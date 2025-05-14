@@ -6,9 +6,9 @@
 </head>
 <body>
 <script type="module">
-    import init, { greet } from "./pkg/playground.js";
+    import init, * as wasmPlayground from "./pkg/playground.js";
     init().then(() => {
-        greet("WebAssembly");
+        wasmPlayground.greet("WebAssembly");
     });
 </script>
 </body>

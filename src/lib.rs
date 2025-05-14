@@ -9,9 +9,8 @@ extern {
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, wasm-game-of-life!");
-    alert(math::random().to_string().as_str())
+pub fn greet(name: &str) {
+    alert(format!("Hello, {}!", name).as_str());
 }
 
 #[wasm_bindgen]
