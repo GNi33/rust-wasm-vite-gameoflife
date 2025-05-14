@@ -1,20 +1,24 @@
-mod math {
-    mod math_js {
-        #[link(wasm_import_module = "Math")]
-        unsafe extern "C" {
-            pub fn random() -> f64;
-        }
-    }
-    
-    pub fn random() -> f64 {
-        unsafe { math_js::random() }
-    }
+use wasm_bindgen::prelude::*;
+
+mod utils;
+mod math;
+
+#[wasm_bindgen]
+extern {
+    fn alert(s: &str);
 }
 
-#[unsafe(export_name = "add")]
-pub extern "C" fn add(left: f64, right: f64) -> f64 {
+#[wasm_bindgen]
+pub fn greet() {
+    alert("Hello, wasm-game-of-life!");
+    alert(math::random().to_string().as_str())
+}
+
+#[wasm_bindgen]
+pub fn add(left: f64, right: f64) -> f64 {
     left + right + math::random()
 }
+
 
 #[cfg(test)]
 mod tests {
