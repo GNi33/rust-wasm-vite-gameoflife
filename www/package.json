@@ -1,0 +1,19 @@
+{
+  "name": "wasm-playground",
+  "version": "0.0.1",
+  "main": "bootstrap.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "playground": "file:../pkg"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}
