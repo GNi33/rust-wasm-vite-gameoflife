@@ -131,6 +131,20 @@ impl Universe {
     pub fn render(&self) -> String {
         self.to_string()
     }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
+    // *const Cell is a pointer type, not a dereference.
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
+    }
 }
 
 #[cfg(test)]
