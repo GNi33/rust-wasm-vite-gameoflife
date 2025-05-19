@@ -1,4 +1,19 @@
-import init, * as wasmPlayground from "playground";
+import init from "playground";
+import {greet} from "playground";
+import {Universe} from "playground";
+
 init().then(() => {
-    wasmPlayground.greet("WebAssembly");
+    //greet("WebAssembly");
+
+    const pre = document.getElementById("game-of-life-canvas");
+    const universe = Universe.new();
+
+    const renderLoop = () => {
+        pre.textContent = universe.render();
+        universe.tick();
+
+        requestAnimationFrame(renderLoop);
+    }
+
+    requestAnimationFrame(renderLoop);
 });
