@@ -57,6 +57,17 @@ impl Universe {
     }
 }
 
+fn init_cells_default(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height).map(|i| {
+            if i % 2 == 0 || i % 7 == 0 {
+                Cell::Alive
+            } else {
+                Cell::Dead
+            }
+        })
+        .collect()
+}
+
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for line in self.cells.as_slice().chunks(self.width as usize) {
@@ -107,19 +118,16 @@ impl Universe {
         self.cells = next;
     }
 
-    pub fn new() -> Universe {
+    pub fn new(start_type: &str) -> Universe {
         let width = 64;
         let height = 64;
 
-        let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
+        let cells = match start_type {
+            //"random" => init_cells_random(width, height),
+            //"all_dead" => init_cells_all_dead(width, height),
+            //"checkerboard" => init_cells_checkerboard(width, height),
+            _ => init_cells_default(width, height),
+        };
 
         Universe {
             width,

@@ -15,7 +15,7 @@ if (!canvas) {
     throw new Error('Element with id "game-of-life-canvas" not found');
 }
 
-const universe: Universe = Universe.new();
+const universe: Universe = Universe.new("default");
 const width: number = universe.width();
 const height: number = universe.height();
 

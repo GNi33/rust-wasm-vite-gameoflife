@@ -1,5 +1,5 @@
 mod math_js {
-    use wasm_bindgen::prelude::*;    
+    use wasm_bindgen::prelude::*;
 
     #[wasm_bindgen]
     extern "C" {
@@ -8,6 +8,6 @@ mod math_js {
     }
 }
 
-pub fn random() -> f64 { 
+pub fn random() -> f64 {
     math_js::random()
 }
