@@ -59,13 +59,43 @@ impl Universe {
 
 fn init_cells_default(width: u32, height: u32) -> Vec<Cell> {
     (0..width * height).map(|i| {
-            if i % 2 == 0 || i % 7 == 0 {
-                Cell::Alive
-            } else {
-                Cell::Dead
-            }
-        })
-        .collect()
+        if i % 2 == 0 || i % 7 == 0 {
+            Cell::Alive
+        } else {
+            Cell::Dead
+        }
+    })
+    .collect()
+}
+
+fn init_cells_random(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height).map(|_i|{
+        if math::random() > 0.5 {
+            Cell::Alive
+        } else {
+            Cell::Dead
+        }
+    })
+    .collect()
+}
+
+fn init_cells_all_dead(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height).map(|_i|{
+        Cell::Dead
+    })
+    .collect()
+}
+
+fn init_cells_spaceship(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height).map(|i|{
+        if i == 4*height + 3 || i == 5*height + 4 || i == 6 * height + 2 ||
+           i == 6*height + 3 || i == 6*height + 4 {
+            Cell::Alive
+        } else {
+            Cell::Dead
+        }
+    })
+    .collect()
 }
 
 impl fmt::Display for Universe {
@@ -123,9 +153,9 @@ impl Universe {
         let height = 64;
 
         let cells = match start_type {
-            //"random" => init_cells_random(width, height),
-            //"all_dead" => init_cells_all_dead(width, height),
-            //"checkerboard" => init_cells_checkerboard(width, height),
+            "random" => init_cells_random(width, height),
+            "all_dead" => init_cells_all_dead(width, height),
+            "spaceship" => init_cells_spaceship(width, height),
             _ => init_cells_default(width, height),
         };
 

@@ -10,12 +10,13 @@ wasm = await init();
 
 const memory: WebAssembly.Memory = wasm.memory;
 
-const canvas = document.getElementById("game-of-life-canvas") as HTMLElement | null;
+const canvas = document.getElementById("game-of-life-canvas") as HTMLCanvasElement | null;
+
 if (!canvas) {
     throw new Error('Element with id "game-of-life-canvas" not found');
 }
 
-const universe: Universe = Universe.new("default");
+const universe: Universe = Universe.new("spaceship");
 const width: number = universe.width();
 const height: number = universe.height();
 
