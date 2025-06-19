@@ -29,17 +29,38 @@ pub enum Cell {
 
 #[wasm_bindgen]
 pub struct Universe {
-    width: u32,
-    height: u32,
-    cells: Vec<Cell>,
+    width: usize,
+    height: usize,
+    cells: Vec<u8>,
 }
 
 impl Universe {
-    fn get_index(&self, row: u32, column: u32) -> usize {
+    fn get_index(&self, row: usize, column: usize) -> usize {
         (row * self.width + column) as usize
     }
 
-    fn live_neighbour_count(&self, row: u32, column: u32) -> u8 {
+    fn get_cell(&self, idx: usize) -> Cell {
+        let byte = self.cells[idx / 8];
+        let bit = idx % 8;
+
+        if (byte >> bit) & 1 == 1 {
+            Cell::Alive
+        } else {
+            Cell::Dead
+        }
+    }
+
+    fn set_cell(&mut self, idx: usize, cell: Cell) {
+        let byte = &mut self.cells[idx / 8];
+        let bit = idx % 8;
+
+        match cell {
+            Cell::Alive => *byte |= 1 << bit,
+            Cell::Dead => *byte &= !(1 << bit),
+        }
+    }
+
+    fn live_neighbour_count(&self, row: usize, column: usize) -> u8 {
         let mut count = 0;
         for delta_row in [self.height - 1 , 0 , 1].iter().cloned() {
             for delta_column in [self.width - 1 , 0 , 1].iter().cloned() {
@@ -50,59 +71,77 @@ impl Universe {
 
                 let neighbour_row = (row + delta_row) % self.height;
                 let neighbour_column = (column + delta_column) % self.width;
-                count += self.cells[self.get_index(neighbour_row, neighbour_column)] as u8;
+                count += self.get_cell(self.get_index(neighbour_row, neighbour_column)) as u8;
             }
         }
         count
     }
 }
 
-fn init_cells_default(width: u32, height: u32) -> Vec<Cell> {
-    (0..width * height).map(|i| {
-        if i % 2 == 0 || i % 7 == 0 {
-            Cell::Alive
-        } else {
-            Cell::Dead
+fn init_cells_default(width: usize, height: usize) -> Vec<u8> {
+    let mut cells = init_cells_all_dead(width, height);
+
+    for byte in 0..cells.len() {
+        for bit in 0..8 {
+            let cell_idx = byte * 8 + bit;
+            // Use cell_idx as the actual cell index
+            if cell_idx % 2 == 0 || cell_idx % 7 == 0 {
+                cells[byte] |= 1 << bit;
+            }
+
         }
-    })
-    .collect()
+    }
+
+    cells
 }
 
-fn init_cells_random(width: u32, height: u32) -> Vec<Cell> {
-    (0..width * height).map(|_i|{
-        if math::random() > 0.5 {
-            Cell::Alive
-        } else {
-            Cell::Dead
+fn init_cells_random(width: usize, height: usize) -> Vec<u8> {
+    let mut cells = init_cells_all_dead(width, height);
+
+    for byte in 0..cells.len() {
+        for bit in 0..8 {
+            let cell_idx = byte * 8 + bit;
+            // Use cell_idx as the actual cell index
+            if math::random() > 0.5 {
+                cells[byte] |= 1 << bit;
+            }
         }
-    })
-    .collect()
+    }
+
+    cells
 }
 
-fn init_cells_all_dead(width: u32, height: u32) -> Vec<Cell> {
-    (0..width * height).map(|_i|{
-        Cell::Dead
-    })
-    .collect()
+fn init_cells_all_dead(width: usize, height: usize) -> Vec<u8> {
+    vec![Cell::Dead as u8; (width * height + 7) / 8]
 }
 
-fn init_cells_spaceship(width: u32, height: u32) -> Vec<Cell> {
-    (0..width * height).map(|i|{
-        if i == 4*height + 3 || i == 5*height + 4 || i == 6 * height + 2 ||
-           i == 6*height + 3 || i == 6*height + 4 {
-            Cell::Alive
-        } else {
-            Cell::Dead
-        }
-    })
-    .collect()
+fn init_cells_spaceship(width: usize, height: usize) -> Vec<u8> {
+
+    let mut cells = init_cells_all_dead(width, height);
+
+    let spaceship_cells = [
+        (4, 3),
+        (5, 4),
+        (6, 2),
+        (6, 3),
+        (6, 4),
+    ];
+
+    for &(row, col) in &spaceship_cells {
+        let idx = row * width + col;
+        let byte = idx / 8;
+        let bit = idx % 8;
+        cells[byte] |= 1 << bit;
+    }
+
+    cells
 }
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for line in self.cells.as_slice().chunks(self.width as usize) {
             for &cell in line {
-                let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
+                let symbol = if cell == (Cell::Dead as u8) { '◻' } else { '◼' };
                 write!(f, "{}", symbol)?;
             }
             write!(f, "\n")?;
@@ -121,7 +160,7 @@ impl Universe {
         for row in 0..self.height {
             for col in 0..self.width {
                 let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
+                let cell = self.get_cell(idx);
                 let live_neighbors = self.live_neighbour_count(row, col);
 
                 let next_cell = match (cell, live_neighbors) {
@@ -141,7 +180,13 @@ impl Universe {
                     (otherwise, _) => otherwise,
                 };
 
-                next[idx] = next_cell;
+                let byte = &mut next[idx / 8];
+                let bit = idx % 8;
+
+                match next_cell {
+                    Cell::Alive => *byte |= 1 << bit,
+                    Cell::Dead => *byte &= !(1 << bit),
+                }
             }
         }
 
@@ -170,17 +215,17 @@ impl Universe {
         self.to_string()
     }
 
-    pub fn width(&self) -> u32 {
+    pub fn width(&self) -> usize {
         self.width
     }
 
-    pub fn height(&self) -> u32 {
+    pub fn height(&self) -> usize {
         self.height
     }
 
     // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
     // *const Cell is a pointer type, not a dereference.
-    pub fn cells(&self) -> *const Cell {
+    pub fn cells(&self) -> *const u8 {
         self.cells.as_ptr()
     }
 }

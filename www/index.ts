@@ -16,7 +16,7 @@ if (!canvas) {
     throw new Error('Element with id "game-of-life-canvas" not found');
 }
 
-const universe: Universe = Universe.new("spaceship");
+const universe: Universe = Universe.new("random");
 const width: number = universe.width();
 const height: number = universe.height();
 
@@ -57,14 +57,22 @@ const getIndex = (row: number, column: number): number => {
 
 const drawCells = (): void => {
     const cellsPtr: number = universe.cells();
-    const cells: Uint8Array = new Uint8Array(memory.buffer, cellsPtr, width * height);
+
+    // The number of bytes needed to store all cells as bits
+    const numBytes = Math.ceil((width * height) / 8);
+    const cells: Uint8Array = new Uint8Array(memory.buffer, cellsPtr, numBytes);
 
     ctx.beginPath();
 
     for (let row = 0; row < height; row++) {
         for (let column = 0; column < width; column++) {
             const idx: number = getIndex(row, column);
-            ctx.fillStyle = cells[idx] === Cell.Alive ? ALIVE_COLOR : DEAD_COLOR;
+
+            const byte = Math.floor(idx / 8);
+            const bit = idx % 8;
+            const isAlive = (cells[byte] & (1 << bit)) !== Cell.Dead;
+
+            ctx.fillStyle = isAlive ? ALIVE_COLOR : DEAD_COLOR;
             ctx.fillRect(
                 column * (CELL_SIZE + 1) + 1,
                 row * (CELL_SIZE + 1) + 1,
