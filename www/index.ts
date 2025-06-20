@@ -16,7 +16,7 @@ if (!canvas) {
     throw new Error('Element with id "game-of-life-canvas" not found');
 }
 
-const universe: Universe = Universe.new("random");
+const universe: Universe = Universe.new("spaceship");
 const width: number = universe.width();
 const height: number = universe.height();
 
@@ -28,7 +28,6 @@ const ctx: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRendering
 const renderLoop = (): void => {
     universe.tick();
 
-    drawGrid();
     drawCells();
 
     requestAnimationFrame(renderLoop);
@@ -85,4 +84,5 @@ const drawCells = (): void => {
     ctx.stroke();
 };
 
+drawGrid();
 requestAnimationFrame(renderLoop);
