@@ -4,6 +4,7 @@ use std::fmt;
 #[cfg(test)]
 use wasm_bindgen_test::wasm_bindgen_test;
 
+#[macro_use]
 mod utils;
 mod math;
 
@@ -213,6 +214,8 @@ impl Universe {
     pub fn new(start_type: &str) -> Universe {
         let width = 128;
         let height = 128;
+
+        log!("Initializing universe with width {} and height {}", width, height);
 
         let cells = match start_type {
             "random" => init_cells_random(width, height),
