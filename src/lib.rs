@@ -1,6 +1,9 @@
 use wasm_bindgen::prelude::*;
 use std::fmt;
 
+#[cfg(test)]
+use wasm_bindgen_test::wasm_bindgen_test;
+
 mod utils;
 mod math;
 
@@ -82,6 +85,20 @@ impl Universe {
             }
         }
         count
+    }
+
+    pub fn get_cells(&self) -> &Vec<u8> {
+        &self.store.cells
+    }
+
+    /// Set cells to be alive in the universe by passing the row and column
+    /// of each cell as an array.
+    pub fn set_cells(&mut self, cells: &[(usize, usize)]) {
+        for (row, col) in cells.iter().cloned() {
+            let idx = self.get_index(row, col);
+
+            self.store.set_cell(idx, Cell::Alive);
+        }
     }
 }
 
@@ -207,7 +224,7 @@ impl Universe {
         let store = CellStore {
             cells,
         };
-        
+
         Universe {
             width,
             height,
@@ -227,6 +244,18 @@ impl Universe {
         self.height
     }
 
+    pub fn set_width(&mut self, width: usize) {
+        self.width = width;
+
+        self.store.cells = init_cells_all_dead(width, self.height);
+    }
+
+    pub fn set_height(&mut self, height: usize) {
+        self.height = height;
+
+        self.store.cells = init_cells_all_dead(self.width, height);
+    }
+
     // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
     // *const Cell is a pointer type, not a dereference.
     pub fn cells(&self) -> *const u8 {
@@ -238,7 +267,7 @@ impl Universe {
 mod tests {
     use super::*;
 
-    #[test]
+    #[wasm_bindgen_test]
     fn it_works() {
         let result = add(2.0, 2.0);
         assert!(result > 4.0);
