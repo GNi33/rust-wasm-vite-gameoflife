@@ -3,23 +3,42 @@
 <head>
     <meta charset="utf-8" />
     <title>hello-wasm example</title>
+    <link href="/src/styles/styles.css" rel="stylesheet">
 
-    <style>
-        body {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
 </head>
-<body>
-    <canvas id="game-of-life-canvas"></canvas>
+<body class="flex min-h-screen">
+    <main class="max-w-5xl justify-center mx-auto size-full">
+        <h1 class="text-3xl font-bold text-gray-800 sm:text-4xl text-center mb-4">Game of Life</h1>
+
+        <div class="flex gap-5">
+            <div class="flex-2">
+                <canvas id="game-of-life-canvas"></canvas>
+            </div>
+            <div class="flex-1">
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-center">
+                        <button
+                                id="play-pause-button"
+                                type="button"
+                                class="
+                                    js-state-paused
+                                    text-white bg-blue-700 hover:bg-blue-800
+                                    dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                    focus:ring-4 focus:outline-none focus:ring-blue-300
+                                    font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center">
+                            <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M14 19V5h4v14zm-8 0V5h4v14z"/>
+                            </svg>
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M8 19V5l11 7z"/>
+                            </svg>
+                            <span class="sr-only">Pause Icon</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
     <script src="./bootstrap.ts"></script>
 </body>
 </html>

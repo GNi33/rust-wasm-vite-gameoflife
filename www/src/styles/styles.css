@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+#play-pause-button.js-state-paused .pause-icon {
+    display: none;
+}
+
+#play-pause-button.js-state-playing .play-icon {
+    display: none;
+}
