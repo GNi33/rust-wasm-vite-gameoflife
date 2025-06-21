@@ -11,6 +11,7 @@ export type GameOfLifeType = {
     start(): void;
     stop(): void;
     isPlaying(): boolean;
+    drawGrid(): void;
 }
 
 class GameOfLife implements GameOfLifeType {
@@ -57,7 +58,9 @@ class GameOfLife implements GameOfLifeType {
         return row * this.width + column;
     }
 
-    private drawGrid(): void {
+    public drawGrid(): void {
+        this.ctx.clearRect(0,0, this.width, this.height);
+
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;
         for (let i = 0; i <= this.width; i++) {
@@ -130,5 +133,8 @@ class GameOfLife implements GameOfLifeType {
 }
 
 export async function initGameOfLife(canvasId: string, initialState: StartType | null): Promise<GameOfLife> {
-    return await GameOfLife.create(canvasId, initialState);
+    let gol = await GameOfLife.create(canvasId, initialState);
+    gol.drawGrid();
+
+    return gol;
 }
