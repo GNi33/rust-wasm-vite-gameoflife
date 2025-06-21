@@ -115,6 +115,10 @@ class GameOfLife {
             this.anmitionFrameId = null;
         }
     }
+
+    public isPlaying(): boolean {
+        return this.anmitionFrameId !== null;
+    }
 }
 
 export async function initGameOfLife(canvasId: string, initialState: string | null): Promise<GameOfLife> {
