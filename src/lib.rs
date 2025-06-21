@@ -3,6 +3,7 @@ use std::fmt;
 
 #[cfg(test)]
 use wasm_bindgen_test::wasm_bindgen_test;
+use web_sys::js_sys;
 
 #[macro_use]
 mod utils;
@@ -29,6 +30,26 @@ pub fn add(left: f64, right: f64) -> f64 {
 pub enum Cell {
     Dead = 0,
     Alive = 1,
+}
+
+#[wasm_bindgen]
+#[repr(u8)]
+pub enum StartType {
+    Default = 0,
+    Random = 1,
+    AllDead = 2,
+    Spaceship = 3,
+}
+
+#[wasm_bindgen]
+pub fn start_type_variants() -> js_sys::Array {
+    let arr = js_sys::Array::new();
+    arr.push(&JsValue::from_str("default"));
+    arr.push(&JsValue::from_str("random"));
+    arr.push(&JsValue::from_str("all_dead"));
+    arr.push(&JsValue::from_str("spaceship"));
+
+    arr
 }
 
 #[derive(Clone)]
@@ -88,9 +109,7 @@ impl Universe {
         count
     }
 
-    pub fn get_cells(&self) -> &Vec<u8> {
-        &self.store.cells
-    }
+    pub fn get_cells(&self) -> &Vec<u8> { &self.store.cells }
 
     /// Set cells to be alive in the universe by passing the row and column
     /// of each cell as an array.
@@ -162,7 +181,7 @@ fn init_cells_spaceship(width: usize, height: usize) -> Vec<u8> {
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.store.cells.as_slice().chunks(self.width as usize) {
+        for line in self.store.cells.as_slice().chunks(self.width) {
             for &cell in line {
                 let symbol = if cell == (Cell::Dead as u8) { '◻' } else { '◼' };
                 write!(f, "{}", symbol)?;
@@ -211,16 +230,16 @@ impl Universe {
         self.store = next;
     }
 
-    pub fn new(start_type: &str) -> Universe {
+    pub fn new(start_type: StartType) -> Universe {
         let width = 128;
         let height = 128;
 
         log!("Initializing universe with width {} and height {}", width, height);
 
         let cells = match start_type {
-            "random" => init_cells_random(width, height),
-            "all_dead" => init_cells_all_dead(width, height),
-            "spaceship" => init_cells_spaceship(width, height),
+            StartType::Random => init_cells_random(width, height),
+            StartType::AllDead => init_cells_all_dead(width, height),
+            StartType::Spaceship => init_cells_spaceship(width, height),
             _ => init_cells_default(width, height),
         };
 
@@ -235,17 +254,11 @@ impl Universe {
         }
     }
 
-    pub fn render(&self) -> String {
-        self.to_string()
-    }
+    pub fn render(&self) -> String { self.to_string() }
 
-    pub fn width(&self) -> usize {
-        self.width
-    }
+    pub fn width(&self) -> usize { self.width }
 
-    pub fn height(&self) -> usize {
-        self.height
-    }
+    pub fn height(&self) -> usize { self.height }
 
     pub fn set_width(&mut self, width: usize) {
         self.width = width;
@@ -261,9 +274,7 @@ impl Universe {
 
     // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
     // *const Cell is a pointer type, not a dereference.
-    pub fn cells(&self) -> *const u8 {
-        self.store.cells.as_ptr()
-    }
+    pub fn cells(&self) -> *const u8 { self.store.cells.as_ptr() }
 }
 
 #[cfg(test)]
