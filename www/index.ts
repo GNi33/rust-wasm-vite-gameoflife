@@ -83,7 +83,14 @@ canvas.addEventListener("click", (event) => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    gameOfLife.toggleCell(x, y);
+    if (event.shiftKey) {
+        gameOfLife.insertPulsar(x, y);
+    } else if (event.ctrlKey) {
+        gameOfLife.insertGlider(x, y);
+    } else {
+        gameOfLife.toggleCell(x, y);
+    }
+
 });
 
 gameOfLife = await initGameOfLife(canvas, 0);
