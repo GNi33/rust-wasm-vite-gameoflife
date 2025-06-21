@@ -1,4 +1,4 @@
-import init, { Cell, Universe, StartType } from "playground";
+import init, {Cell, Universe, StartType} from "playground";
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
@@ -70,7 +70,7 @@ class GameOfLife implements GameOfLifeType {
     }
 
     public drawGrid(): void {
-        this.ctx.clearRect(0,0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
+        this.ctx.clearRect(0, 0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
 
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;
@@ -122,11 +122,11 @@ class GameOfLife implements GameOfLifeType {
 
     public start(): void {
 
-        if(!this.gridDrawn) {
+        if (!this.gridDrawn) {
             this.drawGrid();
         }
 
-        if(this.animationFrameId == null) {
+        if (this.animationFrameId == null) {
             this.animationFrameId = requestAnimationFrame(this.renderLoop);
         }
     }

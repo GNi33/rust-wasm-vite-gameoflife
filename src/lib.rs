@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use std::fmt;
+use wasm_bindgen::prelude::*;
 
 #[cfg(test)]
 use wasm_bindgen_test::wasm_bindgen_test;
@@ -10,7 +10,7 @@ mod utils;
 mod math;
 
 #[wasm_bindgen]
-extern {
+extern "C" {
     fn alert(s: &str);
 }
 
@@ -94,22 +94,26 @@ impl Universe {
 
     fn live_neighbour_count(&self, row: usize, column: usize) -> u8 {
         let mut count = 0;
-        for delta_row in [self.height - 1 , 0 , 1].iter().cloned() {
-            for delta_column in [self.width - 1 , 0 , 1].iter().cloned() {
-
+        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
+            for delta_column in [self.width - 1, 0, 1].iter().cloned() {
                 if delta_row == 0 && delta_column == 0 {
                     continue;
                 }
 
                 let neighbour_row = (row + delta_row) % self.height;
                 let neighbour_column = (column + delta_column) % self.width;
-                count += self.store.get_cell(self.get_index(neighbour_row, neighbour_column)) as u8;
+                count += self
+                    .store
+                    .get_cell(self.get_index(neighbour_row, neighbour_column))
+                    as u8;
             }
         }
         count
     }
 
-    pub fn get_cells(&self) -> &Vec<u8> { &self.store.cells }
+    pub fn get_cells(&self) -> &Vec<u8> {
+        &self.store.cells
+    }
 
     /// Set cells to be alive in the universe by passing the row and column
     /// of each cell as an array.
@@ -132,7 +136,6 @@ fn init_cells_default(width: usize, height: usize) -> Vec<u8> {
             if cell_idx % 2 == 0 || cell_idx % 7 == 0 {
                 cells[byte] |= 1 << bit;
             }
-
         }
     }
 
@@ -158,16 +161,9 @@ fn init_cells_all_dead(width: usize, height: usize) -> Vec<u8> {
 }
 
 fn init_cells_spaceship(width: usize, height: usize) -> Vec<u8> {
-
     let mut cells = init_cells_all_dead(width, height);
 
-    let spaceship_cells = [
-        (4, 3),
-        (5, 4),
-        (6, 2),
-        (6, 3),
-        (6, 4),
-    ];
+    let spaceship_cells = [(4, 3), (5, 4), (6, 2), (6, 3), (6, 4)];
 
     for &(row, col) in &spaceship_cells {
         let idx = row * width + col;
@@ -183,7 +179,11 @@ impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for line in self.store.cells.as_slice().chunks(self.width) {
             for &cell in line {
-                let symbol = if cell == (Cell::Dead as u8) { '◻' } else { '◼' };
+                let symbol = if cell == (Cell::Dead as u8) {
+                    '◻'
+                } else {
+                    '◼'
+                };
                 write!(f, "{}", symbol)?;
             }
             write!(f, "\n")?;
@@ -246,7 +246,11 @@ impl Universe {
         let width = 128;
         let height = 128;
 
-        log!("Initializing universe with width {} and height {}", width, height);
+        log!(
+            "Initializing universe with width {} and height {}",
+            width,
+            height
+        );
 
         let cells = match start_type {
             StartType::Random => init_cells_random(width, height),
@@ -255,9 +259,7 @@ impl Universe {
             _ => init_cells_default(width, height),
         };
 
-        let store = CellStore {
-            cells,
-        };
+        let store = CellStore { cells };
 
         Universe {
             width,
@@ -266,11 +268,17 @@ impl Universe {
         }
     }
 
-    pub fn render(&self) -> String { self.to_string() }
+    pub fn render(&self) -> String {
+        self.to_string()
+    }
 
-    pub fn width(&self) -> usize { self.width }
+    pub fn width(&self) -> usize {
+        self.width
+    }
 
-    pub fn height(&self) -> usize { self.height }
+    pub fn height(&self) -> usize {
+        self.height
+    }
 
     pub fn set_width(&mut self, width: usize) {
         self.width = width;
@@ -286,7 +294,9 @@ impl Universe {
 
     // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
     // *const Cell is a pointer type, not a dereference.
-    pub fn cells(&self) -> *const u8 { self.store.cells.as_ptr() }
+    pub fn cells(&self) -> *const u8 {
+        self.store.cells.as_ptr()
+    }
 }
 
 #[cfg(test)]

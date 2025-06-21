@@ -1,12 +1,12 @@
-import {type GameOfLifeType } from "./src/modules/game_of_life";
-import { initGameOfLife } from "./src/modules/game_of_life";
+import {type GameOfLifeType} from "./src/modules/game_of_life";
+import {initGameOfLife} from "./src/modules/game_of_life";
 
-import { start_type_variants } from "playground";
+import {start_type_variants} from "playground";
 
 const startTypes = start_type_variants();
 const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
 
-if(!canvas) {
+if (!canvas) {
     console.error("Canvas element with id 'game-of-life-canvas' not found.");
     throw new Error("Canvas element not found");
 }
@@ -69,7 +69,6 @@ canvas.addEventListener("click", (event) => {
     const y = event.clientY - rect.top;
 
     gameOfLife.toggleCell(x, y);
-
 });
 
 gameOfLife = await initGameOfLife(canvas, 0);
