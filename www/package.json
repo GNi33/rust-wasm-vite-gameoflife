@@ -13,7 +13,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "playground": "file:../pkg"
+    "@tailwindcss/vite": "^4.1.10",
+    "playground": "file:../pkg",
+    "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
