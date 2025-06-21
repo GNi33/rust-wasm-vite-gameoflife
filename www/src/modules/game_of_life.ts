@@ -21,7 +21,7 @@ class GameOfLife implements GameOfLifeType {
     private width: number;
     private height: number;
 
-    private anmitionFrameId: number | null = null;
+    private animationFrameId: number | null = null;
     private gridDrawn: boolean = false;
 
     private constructor(
@@ -48,6 +48,7 @@ class GameOfLife implements GameOfLifeType {
         const universe = Universe.new(initialState ?? StartType.Default);
         const width = universe.width();
         const height = universe.height();
+
         canvas.height = (CELL_SIZE + 1) * height + 1;
         canvas.width = (CELL_SIZE + 1) * width + 1;
 
@@ -59,7 +60,7 @@ class GameOfLife implements GameOfLifeType {
     }
 
     public drawGrid(): void {
-        this.ctx.clearRect(0,0, this.width, this.height);
+        this.ctx.clearRect(0,0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
 
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;
@@ -71,8 +72,8 @@ class GameOfLife implements GameOfLifeType {
             this.ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
             this.ctx.lineTo((CELL_SIZE + 1) * this.width + 1, j * (CELL_SIZE + 1) + 1);
         }
-        this.ctx.stroke();
 
+        this.ctx.stroke();
         this.gridDrawn = true;
     }
 
@@ -101,7 +102,7 @@ class GameOfLife implements GameOfLifeType {
 
     private renderLoop = (): void => {
 
-        this.anmitionFrameId = null;
+        this.animationFrameId = null;
 
         this.universe.tick();
         this.drawCells();
@@ -115,20 +116,20 @@ class GameOfLife implements GameOfLifeType {
             this.drawGrid();
         }
 
-        if(this.anmitionFrameId == null) {
-            this.anmitionFrameId = requestAnimationFrame(this.renderLoop);
+        if(this.animationFrameId == null) {
+            this.animationFrameId = requestAnimationFrame(this.renderLoop);
         }
     }
 
     public stop(): void {
-        if (this.anmitionFrameId !== null) {
-            cancelAnimationFrame(this.anmitionFrameId);
-            this.anmitionFrameId = null;
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
         }
     }
 
     public isPlaying(): boolean {
-        return this.anmitionFrameId !== null;
+        return this.animationFrameId !== null;
     }
 }
 
