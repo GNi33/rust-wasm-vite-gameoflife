@@ -1,11 +1,19 @@
-import init, { Cell, Universe } from "playground";
+import init, { Cell, Universe, StartType } from "playground";
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
-class GameOfLife {
+const wasm = await init();
+
+export type GameOfLifeType = {
+    start(): void;
+    stop(): void;
+    isPlaying(): boolean;
+}
+
+class GameOfLife implements GameOfLifeType {
     private memory: WebAssembly.Memory;
     private ctx: CanvasRenderingContext2D;
     private universe: Universe;
@@ -29,14 +37,14 @@ class GameOfLife {
         this.height = height;
     }
 
-    static async create(canvasId: string, initialState: string | null): Promise<GameOfLife> {
-        const wasm = await init();
+    static async create(canvasId: string, initialState: StartType | null): Promise<GameOfLife> {
         const memory: WebAssembly.Memory = wasm.memory;
         const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
         if (!canvas) throw new Error("Element with id " + canvasId + " not found");
 
         const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-        const universe = Universe.new(initialState || "default");
+
+        const universe = Universe.new(initialState ?? StartType.Default);
         const width = universe.width();
         const height = universe.height();
         canvas.height = (CELL_SIZE + 1) * height + 1;
@@ -121,6 +129,6 @@ class GameOfLife {
     }
 }
 
-export async function initGameOfLife(canvasId: string, initialState: string | null): Promise<GameOfLife> {
+export async function initGameOfLife(canvasId: string, initialState: StartType | null): Promise<GameOfLife> {
     return await GameOfLife.create(canvasId, initialState);
 }
