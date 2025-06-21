@@ -12,6 +12,8 @@ export type GameOfLifeType = {
     stop(): void;
     isPlaying(): boolean;
     drawGrid(): void;
+    drawCells(): void;
+    toggleCell(x: number, y: number): void;
 }
 
 class GameOfLife implements GameOfLifeType {
@@ -38,10 +40,8 @@ class GameOfLife implements GameOfLifeType {
         this.height = height;
     }
 
-    static async create(canvasId: string, initialState: StartType | null): Promise<GameOfLife> {
+    static async create(canvas: HTMLCanvasElement, initialState: StartType | null): Promise<GameOfLife> {
         const memory: WebAssembly.Memory = wasm.memory;
-        const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
-        if (!canvas) throw new Error("Element with id " + canvasId + " not found");
 
         const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -57,6 +57,16 @@ class GameOfLife implements GameOfLifeType {
 
     private getIndex(row: number, column: number): number {
         return row * this.width + column;
+    }
+
+    public toggleCell(x: number, y: number): void {
+
+        const row = Math.floor(y / (CELL_SIZE + 1));
+        const column = Math.floor(x / (CELL_SIZE + 1));
+
+        this.universe.toggle_cell(row, column);
+
+        this.drawCells();
     }
 
     public drawGrid(): void {
@@ -77,7 +87,7 @@ class GameOfLife implements GameOfLifeType {
         this.gridDrawn = true;
     }
 
-    private drawCells(): void {
+    public drawCells(): void {
         const cellsPtr: number = this.universe.cells();
         const numBytes = Math.ceil((this.width * this.height) / 8);
         const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
@@ -133,9 +143,10 @@ class GameOfLife implements GameOfLifeType {
     }
 }
 
-export async function initGameOfLife(canvasId: string, initialState: StartType | null): Promise<GameOfLife> {
-    let gol = await GameOfLife.create(canvasId, initialState);
+export async function initGameOfLife(canvas: HTMLCanvasElement, initialState: StartType | null): Promise<GameOfLife> {
+    let gol = await GameOfLife.create(canvas, initialState);
     gol.drawGrid();
+    gol.drawCells();
 
     return gol;
 }

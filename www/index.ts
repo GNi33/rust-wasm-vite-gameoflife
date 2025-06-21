@@ -3,13 +3,19 @@ import { initGameOfLife } from "./src/modules/game_of_life";
 
 import { start_type_variants } from "playground";
 
-let gameOfLife: GameOfLifeType | null = null;
+const startTypes = start_type_variants();
+const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
+
+if(!canvas) {
+    console.error("Canvas element with id 'game-of-life-canvas' not found.");
+    throw new Error("Canvas element not found");
+}
 
 const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
-playPauseButton.classList.add('js-state-paused');
-
-const startTypes = start_type_variants();
 const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
+
+let gameOfLife: GameOfLifeType | null = null;
+
 startTypes.forEach((type, idx) => {
     const option = document.createElement('option');
     option.value = idx.toString();
@@ -29,11 +35,12 @@ startTypeSelect.addEventListener('change', async (event) => {
         }
 
         gameOfLife = null;
-        gameOfLife = await initGameOfLife('game-of-life-canvas', parseInt(eventTarget.value, 10));
+        gameOfLife = await initGameOfLife(canvas, parseInt(eventTarget.value, 10));
     }
 });
 
-gameOfLife = await initGameOfLife('game-of-life-canvas', 0);
+playPauseButton.classList.add('js-state-paused');
+
 playPauseButton.addEventListener('click', () => {
     if (!gameOfLife) {
         console.error("Game of Life instance is not initialized.");
@@ -51,4 +58,18 @@ playPauseButton.addEventListener('click', () => {
     }
 });
 
+canvas.addEventListener("click", (event) => {
+    if (!gameOfLife) {
+        console.error("Game of Life instance is not initialized.");
+        return;
+    }
 
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    gameOfLife.toggleCell(x, y);
+
+});
+
+gameOfLife = await initGameOfLife(canvas, 0);

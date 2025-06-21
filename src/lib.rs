@@ -230,6 +230,18 @@ impl Universe {
         self.store = next;
     }
 
+    pub fn toggle_cell(&mut self, row: usize, col: usize) {
+        let idx = self.get_index(row, col);
+        let current_cell = self.store.get_cell(idx);
+
+        let new_cell = match current_cell {
+            Cell::Alive => Cell::Dead,
+            Cell::Dead => Cell::Alive,
+        };
+
+        self.store.set_cell(idx, new_cell);
+    }
+
     pub fn new(start_type: StartType) -> Universe {
         let width = 128;
         let height = 128;
