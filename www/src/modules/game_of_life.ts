@@ -10,6 +10,7 @@ const wasm = await init();
 export type GameOfLifeType = {
     start(): void;
     stop(): void;
+    setTicksPerFrame: (ticks: number) => void;
     isPlaying(): boolean;
     drawGrid(): void;
     drawCells(): void;
@@ -25,6 +26,7 @@ class GameOfLife implements GameOfLifeType {
 
     private animationFrameId: number | null = null;
     private gridDrawn: boolean = false;
+    private ticksPerFrame: number = 1;
 
     private constructor(
         memory: WebAssembly.Memory,
@@ -40,9 +42,12 @@ class GameOfLife implements GameOfLifeType {
         this.height = height;
     }
 
-    static async create(canvas: HTMLCanvasElement, initialState: StartType | null): Promise<GameOfLife> {
-        const memory: WebAssembly.Memory = wasm.memory;
+    static async create(
+        canvas: HTMLCanvasElement,
+        initialState: StartType | null
+    ): Promise<GameOfLife> {
 
+        const memory: WebAssembly.Memory = wasm.memory;
         const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         const universe = Universe.new(initialState ?? StartType.Default);
@@ -57,6 +62,14 @@ class GameOfLife implements GameOfLifeType {
 
     private getIndex(row: number, column: number): number {
         return row * this.width + column;
+    }
+
+    public setTicksPerFrame(ticks: number): void {
+        if (ticks < 1) {
+            ticks = 1;
+        }
+
+        this.ticksPerFrame = ticks;
     }
 
     public toggleCell(x: number, y: number): void {
@@ -114,7 +127,10 @@ class GameOfLife implements GameOfLifeType {
 
         this.animationFrameId = null;
 
-        this.universe.tick();
+        for (let tick = 0; tick < this.ticksPerFrame; tick++) {
+            this.universe.tick();
+        }
+
         this.drawCells();
 
         this.start();

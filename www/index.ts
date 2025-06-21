@@ -13,6 +13,7 @@ if (!canvas) {
 
 const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
 const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
+const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInputElement;
 
 let gameOfLife: GameOfLifeType | null = null;
 
@@ -40,6 +41,20 @@ startTypeSelect.addEventListener('change', async (event) => {
 });
 
 playPauseButton.classList.add('js-state-paused');
+
+ticksPerFrameInput.addEventListener("change", (event) => {
+    let eventTarget = event.target as HTMLSelectElement;
+
+    if (eventTarget.value) {
+        if (!gameOfLife) {
+            console.error("Game of Life instance is not initialized.");
+            return;
+        }
+
+        const ticksPerFrame = parseInt(eventTarget.value, 10);
+        gameOfLife.setTicksPerFrame(ticksPerFrame);
+    }
+});
 
 playPauseButton.addEventListener('click', () => {
     if (!gameOfLife) {
