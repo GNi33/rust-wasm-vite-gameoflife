@@ -242,6 +242,11 @@ impl Universe {
         self.store.set_cell(idx, new_cell);
     }
 
+    pub fn set_cell(&mut self, row: usize, col: usize, cell: Cell) {
+        let idx = self.get_index(row, col);
+        self.store.set_cell(idx, cell);
+    }
+
     pub fn new(start_type: StartType) -> Universe {
         let width = 128;
         let height = 128;
