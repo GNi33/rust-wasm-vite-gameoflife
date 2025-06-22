@@ -1,13 +1,16 @@
 use std::fmt;
 use wasm_bindgen::prelude::*;
+use web_sys::js_sys;
+use timer::Timer;
 
 #[cfg(test)]
 use wasm_bindgen_test::wasm_bindgen_test;
-use web_sys::js_sys;
+
 
 #[macro_use]
 mod utils;
 mod math;
+mod timer;
 
 #[wasm_bindgen]
 extern "C" {
@@ -197,6 +200,8 @@ impl fmt::Display for Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn tick(&mut self) {
+        let _timer = Timer::new("Universe::tick");
+
         let mut next = self.store.clone();
 
         for row in 0..self.height {
