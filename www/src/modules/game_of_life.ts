@@ -1,4 +1,5 @@
 import init, {Cell, StartType, Universe} from "playground";
+import {Fps} from "./fps.ts";
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
@@ -30,6 +31,9 @@ class GameOfLife implements GameOfLifeType {
     private gridDrawn: boolean = false;
     private ticksPerFrame: number = 1;
 
+    private fpsCounter: Fps;
+    private fpsElement: HTMLDivElement | null = null;
+
     private constructor(
         memory: WebAssembly.Memory,
         ctx: CanvasRenderingContext2D,
@@ -42,6 +46,9 @@ class GameOfLife implements GameOfLifeType {
         this.universe = universe;
         this.width = width;
         this.height = height;
+
+        this.fpsCounter = new Fps();
+        this.fpsElement = document.getElementById('fps') as HTMLDivElement;
     }
 
     static async create(
@@ -204,6 +211,9 @@ class GameOfLife implements GameOfLifeType {
 
     private renderLoop = (): void => {
 
+        let fps = this.fpsCounter.clock();
+        this.renderFps(fps);
+
         this.animationFrameId = null;
 
         for (let tick = 0; tick < this.ticksPerFrame; tick++) {
@@ -235,6 +245,13 @@ class GameOfLife implements GameOfLifeType {
 
     public isPlaying(): boolean {
         return this.animationFrameId !== null;
+    }
+
+    private renderFps(fps: number) {
+
+        if( this.fpsElement) {
+            this.fpsElement.textContent = `FPS: ${fps}`;
+        }
     }
 }
 
