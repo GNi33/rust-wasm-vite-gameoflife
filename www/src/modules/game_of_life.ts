@@ -1,10 +1,12 @@
 import init, {Cell, StartType, Universe} from "playground";
 import {Fps} from "./fps.ts";
+import type {RenderContextInterface} from "./render_context/render_context_interface.ts";
+import RenderContext2D from "./render_context/render_2d.ts";
 
-const CELL_SIZE = 5;
-const GRID_COLOR = "#CCCCCC";
-const DEAD_COLOR = "#FFFFFF";
-const ALIVE_COLOR = "#000000";
+export const CELL_SIZE = 5;
+export const GRID_COLOR = "#CCCCCC";
+export const DEAD_COLOR = "#FFFFFF";
+export const ALIVE_COLOR = "#000000";
 
 const wasm = await init();
 
@@ -20,9 +22,14 @@ export type GameOfLifeType = {
     insertPulsar(x: number, y: number): void;
 }
 
+export const ORenderMode = {
+    Render2D : "2D"
+}
+
+type RenderMode = typeof ORenderMode[keyof typeof ORenderMode];
+
 class GameOfLife implements GameOfLifeType {
     private memory: WebAssembly.Memory;
-    private ctx: CanvasRenderingContext2D;
     private universe: Universe;
     private width: number;
     private height: number;
@@ -33,31 +40,38 @@ class GameOfLife implements GameOfLifeType {
 
     private fpsCounter: Fps;
     private fpsElement: HTMLDivElement | null = null;
+    private renderContext: RenderContextInterface;
 
     private constructor(
         memory: WebAssembly.Memory,
-        ctx: CanvasRenderingContext2D,
+        canvas: HTMLCanvasElement,
         universe: Universe,
         width: number,
-        height: number
+        height: number,
+        renderMode: RenderMode = ORenderMode.Render2D,
     ) {
         this.memory = memory;
-        this.ctx = ctx;
         this.universe = universe;
         this.width = width;
         this.height = height;
 
         this.fpsCounter = new Fps();
         this.fpsElement = document.getElementById('fps') as HTMLDivElement;
+
+        if (renderMode !== ORenderMode.Render2D) {
+            throw new Error(`Unsupported render mode: ${renderMode}`);
+        }
+
+        this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
     }
 
     static async create(
         canvas: HTMLCanvasElement,
-        initialState: StartType | null
+        initialState: StartType | null,
+        renderMode: RenderMode = ORenderMode.Render2D
     ): Promise<GameOfLife> {
 
         const memory: WebAssembly.Memory = wasm.memory;
-        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         const universe = Universe.new(initialState ?? StartType.Default);
         const width = universe.width();
@@ -66,11 +80,7 @@ class GameOfLife implements GameOfLifeType {
         canvas.height = (CELL_SIZE + 1) * height + 1;
         canvas.width = (CELL_SIZE + 1) * width + 1;
 
-        return new GameOfLife(memory, ctx, universe, width, height);
-    }
-
-    private getIndex(row: number, column: number): number {
-        return row * this.width + column;
+        return new GameOfLife(memory, canvas, universe, width, height, renderMode);
     }
 
     public setTicksPerFrame(ticks: number): void {
@@ -169,61 +179,13 @@ class GameOfLife implements GameOfLifeType {
     }
 
     public drawGrid(): void {
-        this.ctx.clearRect(0, 0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
-
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = GRID_COLOR;
-        for (let i = 0; i <= this.width; i++) {
-            this.ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-            this.ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * this.height + 1);
-        }
-        for (let j = 0; j <= this.height; j++) {
-            this.ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
-            this.ctx.lineTo((CELL_SIZE + 1) * this.width + 1, j * (CELL_SIZE + 1) + 1);
-        }
-
-        this.ctx.stroke();
+        this.renderContext.drawGrid();
         this.gridDrawn = true;
     }
 
     public drawCells(): void {
         const cellsPtr: number = this.universe.cells();
-        const numBytes = Math.ceil((this.width * this.height) / 8);
-        const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
-        this.ctx.beginPath();
-
-        this.ctx.fillStyle = ALIVE_COLOR;
-        this.fillCells(cells, true);
-
-        this.ctx.fillStyle = DEAD_COLOR;
-        this.fillCells(cells, false);
-
-        this.ctx.stroke();
-    }
-
-    private fillCells(cells: Uint8Array, alive: boolean): void {
-        const BIT_MASKS = [1,2,4,8,16,32,64,128];
-        for (let row = 0; row < this.height; row++) {
-            for (let column = 0; column < this.width; column++) {
-                const idx: number = this.getIndex(row, column);
-                const byte = Math.floor(idx / 8);
-                const bit = idx % 8;
-                const mask = BIT_MASKS[bit];
-                const cellByte = cells[byte];
-                const isAlive = (cellByte & mask) !== Cell.Dead;
-
-                if( isAlive !== alive) {
-                    continue;
-                }
-
-                this.ctx.fillRect(
-                    column * (CELL_SIZE + 1) + 1,
-                    row * (CELL_SIZE + 1) + 1,
-                    CELL_SIZE,
-                    CELL_SIZE
-                );
-            }
-        }
+        this.renderContext.drawCells(cellsPtr);
     }
 
     private renderLoop = (): void => {
