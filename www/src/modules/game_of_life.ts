@@ -191,13 +191,31 @@ class GameOfLife implements GameOfLifeType {
         const numBytes = Math.ceil((this.width * this.height) / 8);
         const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
         this.ctx.beginPath();
+
+        this.ctx.fillStyle = ALIVE_COLOR;
+        this.fillCells(cells, true);
+
+        this.ctx.fillStyle = DEAD_COLOR;
+        this.fillCells(cells, false);
+
+        this.ctx.stroke();
+    }
+
+    private fillCells(cells: Uint8Array, alive: boolean): void {
+        const BIT_MASKS = [1,2,4,8,16,32,64,128];
         for (let row = 0; row < this.height; row++) {
             for (let column = 0; column < this.width; column++) {
                 const idx: number = this.getIndex(row, column);
                 const byte = Math.floor(idx / 8);
                 const bit = idx % 8;
-                const isAlive = (cells[byte] & (1 << bit)) !== Cell.Dead;
-                this.ctx.fillStyle = isAlive ? ALIVE_COLOR : DEAD_COLOR;
+                const mask = BIT_MASKS[bit];
+                const cellByte = cells[byte];
+                const isAlive = (cellByte & mask) !== Cell.Dead;
+
+                if( isAlive !== alive) {
+                    continue;
+                }
+
                 this.ctx.fillRect(
                     column * (CELL_SIZE + 1) + 1,
                     row * (CELL_SIZE + 1) + 1,
@@ -206,7 +224,6 @@ class GameOfLife implements GameOfLifeType {
                 );
             }
         }
-        this.ctx.stroke();
     }
 
     private renderLoop = (): void => {
