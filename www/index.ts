@@ -73,7 +73,10 @@ playPauseButton.addEventListener('click', () => {
     }
 });
 
-canvas.addEventListener("click", (event) => {
+let isMouseDown = false;
+
+canvas.addEventListener("mousedown", (event) => {
+    isMouseDown = true;
     if (!gameOfLife) {
         console.error("Game of Life instance is not initialized.");
         return;
@@ -90,7 +93,25 @@ canvas.addEventListener("click", (event) => {
     } else {
         gameOfLife.toggleCell(x, y);
     }
+});
 
+canvas.addEventListener("mousemove", (event) => {
+    if (!isMouseDown) return;
+    if (!gameOfLife) {
+        console.error("Game of Life instance is not initialized.");
+        return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    // Only toggle cell if not using shift or ctrl (to avoid multiple gliders/pulsars)
+    if (!event.shiftKey && !event.ctrlKey) {
+        gameOfLife.toggleCell(x, y);
+    }
+});
+
+document.addEventListener("mouseup", () => {
+    isMouseDown = false;
 });
 
 gameOfLife = await initGameOfLife(canvas, 0);
