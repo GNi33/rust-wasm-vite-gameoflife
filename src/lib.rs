@@ -315,6 +315,12 @@ impl Universe {
     pub fn cells(&self) -> *const u8 {
         self.store.cells.as_ptr()
     }
+
+    #[wasm_bindgen]
+    pub fn get_cell(&self, row: usize, col: usize) -> Cell {
+        let idx = self.get_index(row, col);
+        self.store.get_cell(idx)
+    }
 }
 
 #[cfg(test)]

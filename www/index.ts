@@ -81,16 +81,15 @@ canvas.addEventListener("mousedown", (event) => {
         console.error("Game of Life instance is not initialized.");
         return;
     }
-
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-
     if (event.shiftKey) {
         gameOfLife.insertPulsar(x, y);
     } else if (event.ctrlKey) {
         gameOfLife.insertGlider(x, y);
     } else {
+        // On click: toggle cell (so clicking a cell in a "live" state sets it to "dead")
         gameOfLife.toggleCell(x, y);
     }
 });
@@ -104,9 +103,10 @@ canvas.addEventListener("mousemove", (event) => {
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    // Only toggle cell if not using shift or ctrl (to avoid multiple gliders/pulsars)
+
+    // Only set the cell to alive if not using shift or ctrl
     if (!event.shiftKey && !event.ctrlKey) {
-        gameOfLife.toggleCell(x, y);
+        gameOfLife.setCellToAlive(x, y);
     }
 });
 

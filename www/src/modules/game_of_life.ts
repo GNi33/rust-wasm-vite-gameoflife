@@ -18,6 +18,7 @@ export type GameOfLifeType = {
     drawGrid(): void;
     drawCells(): void;
     toggleCell(x: number, y: number): void;
+    setCellToAlive(x: number, y: number): void;
     insertGlider(x: number, y: number): void;
     insertPulsar(x: number, y: number): void;
 }
@@ -230,6 +231,22 @@ class GameOfLife implements GameOfLifeType {
 
         if( this.fpsElement) {
             this.fpsElement.textContent = `FPS: ${fps}`;
+        }
+    }
+
+    public setCellToAlive(x: number, y: number): void {
+        const row = Math.floor(y / (CELL_SIZE + 1));
+        const column = Math.floor(x / (CELL_SIZE + 1));
+        if (this.universe.get_cell) {
+            // If get_cell is available, only set if not already alive
+            if (this.universe.get_cell(row, column) !== Cell.Alive) {
+                this.universe.set_cell(row, column, Cell.Alive);
+                this.drawCells();
+            }
+        } else {
+            // Fallback: just set to alive
+            this.universe.set_cell(row, column, Cell.Alive);
+            this.drawCells();
         }
     }
 }
