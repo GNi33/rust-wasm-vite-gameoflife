@@ -2,6 +2,7 @@ import init, {Cell, StartType, Universe} from "playground";
 import {Fps} from "./fps.ts";
 import type {RenderContextInterface} from "./render_context/render_context_interface.ts";
 import RenderContext2D from "./render_context/render_2d.ts";
+import RenderContextWebGL from "./render_context/render_webgl.ts";
 
 export const CELL_SIZE = 5;
 export const GRID_COLOR = "#CCCCCC";
@@ -23,7 +24,8 @@ export type GameOfLifeType = {
 }
 
 export const ORenderMode = {
-    Render2D : "2D"
+    Render2D : "2D",
+    RenderWebGL : "WebGL",
 }
 
 type RenderMode = typeof ORenderMode[keyof typeof ORenderMode];
@@ -58,11 +60,20 @@ class GameOfLife implements GameOfLifeType {
         this.fpsCounter = new Fps();
         this.fpsElement = document.getElementById('fps') as HTMLDivElement;
 
-        if (renderMode !== ORenderMode.Render2D) {
+        if (renderMode !== ORenderMode.Render2D && renderMode !== ORenderMode.RenderWebGL) {
             throw new Error(`Unsupported render mode: ${renderMode}`);
         }
 
-        this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
+        switch (renderMode) {
+            case "2D":
+                this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
+                break;
+            case "WebGL":
+                this.renderContext = new RenderContextWebGL(canvas, this.memory, this.width, this.height);
+                break;
+            default:
+                throw new Error(`Unsupported render mode: ${renderMode}`);
+        }
     }
 
     static async create(
