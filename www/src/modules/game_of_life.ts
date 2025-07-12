@@ -230,7 +230,7 @@ class GameOfLife implements GameOfLifeType {
     private renderFps(fps: number) {
 
         if( this.fpsElement) {
-            this.fpsElement.textContent = `FPS: ${fps}`;
+            this.fpsElement.textContent = `${fps}`;
         }
     }
 
