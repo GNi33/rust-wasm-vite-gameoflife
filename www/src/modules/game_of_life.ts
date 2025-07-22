@@ -32,17 +32,17 @@ export const ORenderMode = {
 type RenderMode = typeof ORenderMode[keyof typeof ORenderMode];
 
 class GameOfLife implements GameOfLifeType {
-    private memory: WebAssembly.Memory;
+    private readonly memory: WebAssembly.Memory;
     private universe: Universe;
-    private width: number;
-    private height: number;
+    private readonly width: number;
+    private readonly height: number;
 
     private animationFrameId: number | null = null;
     private gridDrawn: boolean = false;
     private ticksPerFrame: number = 1;
 
     private fpsCounter: Fps;
-    private fpsElement: HTMLDivElement | null = null;
+    private readonly fpsElement: HTMLDivElement | null = null;
     private renderContext: RenderContextInterface;
 
     private constructor(
@@ -61,15 +61,11 @@ class GameOfLife implements GameOfLifeType {
         this.fpsCounter = new Fps();
         this.fpsElement = document.getElementById('fps') as HTMLDivElement;
 
-        if (renderMode !== ORenderMode.Render2D && renderMode !== ORenderMode.RenderWebGL) {
-            throw new Error(`Unsupported render mode: ${renderMode}`);
-        }
-
         switch (renderMode) {
-            case "2D":
+            case ORenderMode.Render2D:
                 this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
                 break;
-            case "WebGL":
+            case ORenderMode.RenderWebGL:
                 this.renderContext = new RenderContextWebGL(canvas, this.memory, this.width, this.height);
                 break;
             default:
@@ -249,13 +245,13 @@ class GameOfLife implements GameOfLifeType {
         const row = Math.floor(y / (CELL_SIZE + 1));
         const column = Math.floor(x / (CELL_SIZE + 1));
         if (this.universe.get_cell) {
-            // If get_cell is available, only set if not already alive
+            // If "get_cell" is available, only set if not already alive
             if (this.universe.get_cell(row, column) !== Cell.Alive) {
                 this.universe.set_cell(row, column, Cell.Alive);
                 this.drawCells();
             }
         } else {
-            // Fallback: just set to alive
+            // Fallback: only set to alive
             this.universe.set_cell(row, column, Cell.Alive);
             this.drawCells();
         }
@@ -266,8 +262,8 @@ function wrapIndex(index: number, max: number): number {
     return ((index % max) + max) % max;
 }
 
-export async function initGameOfLife(canvas: HTMLCanvasElement, initialState: StartType | null): Promise<GameOfLife> {
-    let gol = await GameOfLife.create(canvas, initialState);
+export async function initGameOfLife(canvas: HTMLCanvasElement, initialState: StartType | null, renderMode: RenderMode | null): Promise<GameOfLife> {
+    let gol = await GameOfLife.create(canvas, initialState, renderMode ?? ORenderMode.Render2D);
     gol.drawGrid();
     gol.drawCells();
 
