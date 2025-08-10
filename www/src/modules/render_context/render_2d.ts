@@ -27,8 +27,18 @@ export default class RenderContext2D implements RenderContextInterface {
         this.height = height;
     }
 
-    public drawGrid(): void {
+    public draw(cellsPtr: number): void {
+        this.clear();
+
+        this.drawGrid();
+        this.drawCells(cellsPtr);
+    }
+
+    public clear(): void {
         this.ctx.clearRect(0, 0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
+    }
+
+    public drawGrid(): void {
 
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;

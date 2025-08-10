@@ -14,7 +14,8 @@ if (!canvas) {
 const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
 const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
 const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInputElement;
-const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLInputElement;
+const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLSpanElement;
+const showGridCheckbox = document.getElementById('show-grid-cb') as HTMLInputElement;
 
 let gameOfLife: GameOfLifeType | null = null;
 
@@ -57,6 +58,20 @@ ticksPerFrameInput.addEventListener("change", (event) => {
 
         ticksPerFrameValue.textContent = ticksPerFrame.toString();
     }
+});
+
+showGridCheckbox.addEventListener("change", (event) => {
+    let eventTarget = event.target as HTMLInputElement;
+
+    const showGrid = eventTarget.checked;
+
+    if (!gameOfLife) {
+        console.error("Game of Life instance is not initialized.");
+        return;
+    }
+
+    gameOfLife.setDrawGridFlag(showGrid);
+    gameOfLife.draw();
 });
 
 playPauseButton.addEventListener('click', () => {
