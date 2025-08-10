@@ -76,6 +76,7 @@ export default class RenderContext2D implements RenderContextInterface {
     private fillCells(cells: Uint8Array, alive: boolean): void {
         const BIT_MASKS = [1,2,4,8,16,32,64,128];
         const gridAddition = this.drawGridFlag ? 0 : 1;
+
         for (let row = 0; row < this.height; row++) {
             for (let column = 0; column < this.width; column++) {
                 const idx: number = this.getIndex(row, column);
@@ -89,9 +90,17 @@ export default class RenderContext2D implements RenderContextInterface {
                     continue;
                 }
 
+                let fillCol = column * (CELL_SIZE + 1);
+                let fillRow = row * (CELL_SIZE + 1);
+
+                if(this.drawGridFlag) {
+                    fillCol += 1;
+                    fillRow += 1;
+                }
+
                 this.ctx.fillRect(
-                    column * (CELL_SIZE + 1) + 1,
-                    row * (CELL_SIZE + 1) + 1,
+                    fillCol,
+                    fillRow,
                     CELL_SIZE + gridAddition,
                     CELL_SIZE + gridAddition
                 );
