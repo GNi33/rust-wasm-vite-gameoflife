@@ -72,13 +72,15 @@ class GameOfLife implements GameOfLifeType {
 
     static async create(
         canvas: HTMLCanvasElement,
+        universeWidth: number = 128,
+        universeHeight: number = 128,
         initialState: StartType | null,
         renderMode: RenderMode = ORenderMode.Render2D
     ): Promise<GameOfLife> {
 
         const memory: WebAssembly.Memory = wasm.memory;
 
-        const universe = Universe.new(initialState ?? StartType.Default);
+        const universe = Universe.new(universeWidth, universeHeight, initialState ?? StartType.Default);
         const width = universe.width();
         const height = universe.height();
 
@@ -277,10 +279,12 @@ function wrapIndex(index: number, max: number): number {
 
 export async function initGameOfLife(
     canvas: HTMLCanvasElement,
+    width: number = 128,
+    height: number = 128,
     initialState: StartType | null
 ): Promise<GameOfLife> {
 
-    let gol = await GameOfLife.create(canvas, initialState);
+    let gol = await GameOfLife.create(canvas, width, height, initialState);
     gol.drawGrid();
     gol.drawCells();
 
