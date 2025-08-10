@@ -3,4 +3,5 @@ export interface RenderContextInterface {
     clear(): void;
     drawGrid(): void;
     drawCells(cellsPtr: number): void;
+    setDrawGridFlag(flag: boolean): void;
 }

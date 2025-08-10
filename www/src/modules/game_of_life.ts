@@ -267,6 +267,7 @@ class GameOfLife implements GameOfLifeType {
 
     public setDrawGridFlag(flag: boolean): void {
         this.drawGridFlag = flag;
+        this.renderContext.setDrawGridFlag(flag);
     }
 }
 
