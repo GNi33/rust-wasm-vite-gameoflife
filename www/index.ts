@@ -1,10 +1,10 @@
-import {type GameOfLifeType} from "./src/modules/game_of_life";
+import {type GameOfLifeType, ORenderMode} from "./src/modules/game_of_life";
 import {initGameOfLife} from "./src/modules/game_of_life";
 
 import {start_type_variants} from "playground";
 
 const startTypes = start_type_variants();
-const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
+let canvas: HTMLCanvasElement = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
 
 if (!canvas) {
     console.error("Canvas element with id 'game-of-life-canvas' not found.");
@@ -12,6 +12,7 @@ if (!canvas) {
 }
 
 const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
+const renderTypeSelect = document.getElementById('render-type-select') as HTMLSelectElement;
 const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
 const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInputElement;
 const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLSpanElement;
@@ -30,25 +31,34 @@ startTypes.forEach((type, idx) => {
     startTypeSelect.appendChild(option);
 });
 
+for (const [_, value] of Object.entries(ORenderMode)) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    renderTypeSelect.appendChild(option);
+}
+
+
 startTypeSelect.addEventListener('change', async (event) => {
     let eventTarget = event.target as HTMLSelectElement;
 
     if (eventTarget.value) {
+        await initializeGameOfLife();
+    }
+});
 
-        if (gameOfLife) {
-            gameOfLife.stop();
-            playPauseButton.classList.remove('js-state-playing');
-            playPauseButton.classList.add('js-state-paused');
-        }
+renderTypeSelect.addEventListener('change', async (event) => {
+    let eventTarget = event.target as HTMLSelectElement;
 
-        const newWidth = parseInt(universeWidthInput.value, 10);
-        const newHeight = parseInt(universeHeightInput.value, 10);
+    if (eventTarget.value) {
 
-        gameOfLife = null;
-        gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, parseInt(eventTarget.value, 10));
+        // A canvas element cannot be reused with a different rendering context, so we need to create a new one.
+        let newCvs = canvas.cloneNode(false) as HTMLCanvasElement;
+        canvas.parentNode?.replaceChild(newCvs, canvas);
+        canvas = newCvs;
 
-        gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
-        gameOfLife.draw();
+        attachCanvasHandlers(canvas);
+        await initializeGameOfLife();
     }
 });
 
@@ -84,6 +94,49 @@ showGridCheckbox.addEventListener("change", (event) => {
     gameOfLife.draw();
 });
 
+let isMouseDown = false;
+
+const attachCanvasHandlers = (canvas: HTMLCanvasElement) => {
+    canvas.addEventListener("mousedown", (event) => {
+        isMouseDown = true;
+        if (!gameOfLife) {
+            console.error("Game of Life instance is not initialized.");
+            return;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        if (event.shiftKey) {
+            gameOfLife.insertPulsar(x, y);
+        } else if (event.ctrlKey) {
+            gameOfLife.insertGlider(x, y);
+        } else {
+            // On click: toggle cell (so clicking a cell in a "live" state sets it to "dead")
+            gameOfLife.toggleCell(x, y);
+        }
+    });
+
+    canvas.addEventListener("mousemove", (event) => {
+        if (!isMouseDown) return;
+        if (!gameOfLife) {
+            console.error("Game of Life instance is not initialized.");
+            return;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Only set the cell to alive if not using shift or ctrl
+        if (!event.shiftKey && !event.ctrlKey) {
+            gameOfLife.setCellToAlive(x, y);
+        }
+    });
+
+    document.addEventListener("mouseup", () => {
+        isMouseDown = false;
+    });
+}
+
 playPauseButton.addEventListener('click', () => {
     if (!gameOfLife) {
         console.error("Game of Life instance is not initialized.");
@@ -102,9 +155,14 @@ playPauseButton.addEventListener('click', () => {
 });
 
 setUniverseSizeButton.addEventListener('click', async () => {
+    await initializeGameOfLife();
+})
+
+const initializeGameOfLife = async () => {
+    const renderMode = renderTypeSelect.value;
+    const startType = parseInt(startTypeSelect.value, 10);
     const newWidth = parseInt(universeWidthInput.value, 10);
     const newHeight = parseInt(universeHeightInput.value, 10);
-    const startType = parseInt(startTypeSelect.value, 10);
 
     if (gameOfLife) {
         gameOfLife.stop();
@@ -113,51 +171,14 @@ setUniverseSizeButton.addEventListener('click', async () => {
     }
 
     gameOfLife = null;
-    gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, startType);
+    gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, startType, renderMode);
 
     gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
     gameOfLife.draw();
-})
+}
 
-let isMouseDown = false;
+(async () => {
+    attachCanvasHandlers(canvas);
+    gameOfLife = await initGameOfLife(canvas, 128, 128, 0, ORenderMode.Render2D);
+})();
 
-canvas.addEventListener("mousedown", (event) => {
-    isMouseDown = true;
-    if (!gameOfLife) {
-        console.error("Game of Life instance is not initialized.");
-        return;
-    }
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    if (event.shiftKey) {
-        gameOfLife.insertPulsar(x, y);
-    } else if (event.ctrlKey) {
-        gameOfLife.insertGlider(x, y);
-    } else {
-        // On click: toggle cell (so clicking a cell in a "live" state sets it to "dead")
-        gameOfLife.toggleCell(x, y);
-    }
-});
-
-canvas.addEventListener("mousemove", (event) => {
-    if (!isMouseDown) return;
-    if (!gameOfLife) {
-        console.error("Game of Life instance is not initialized.");
-        return;
-    }
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    // Only set the cell to alive if not using shift or ctrl
-    if (!event.shiftKey && !event.ctrlKey) {
-        gameOfLife.setCellToAlive(x, y);
-    }
-});
-
-document.addEventListener("mouseup", () => {
-    isMouseDown = false;
-});
-
-gameOfLife = await initGameOfLife(canvas, 128, 128, 0);

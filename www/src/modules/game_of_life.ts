@@ -2,6 +2,7 @@ import init, {Cell, StartType, Universe} from "playground";
 import {Fps} from "./fps.ts";
 import type {RenderContextInterface} from "./render_context/render_context_interface.ts";
 import RenderContext2D from "./render_context/render_2d.ts";
+import RenderContextWebGL from "./render_context/render_webgl.ts";
 
 export const CELL_SIZE = 5;
 export const GRID_COLOR = "#CCCCCC";
@@ -26,23 +27,24 @@ export type GameOfLifeType = {
 }
 
 export const ORenderMode = {
-    Render2D : "2D"
+    Render2D : "2D",
+    RenderWebGL : "WebGL",
 }
 
 type RenderMode = typeof ORenderMode[keyof typeof ORenderMode];
 
 class GameOfLife implements GameOfLifeType {
-    private memory: WebAssembly.Memory;
+    private readonly memory: WebAssembly.Memory;
     private universe: Universe;
-    private width: number;
-    private height: number;
+    private readonly width: number;
+    private readonly height: number;
 
     private animationFrameId: number | null = null;
     private gridDrawn: boolean = false;
     private ticksPerFrame: number = 1;
 
     private fpsCounter: Fps;
-    private fpsElement: HTMLDivElement | null = null;
+    private readonly fpsElement: HTMLDivElement | null = null;
     private renderContext: RenderContextInterface;
 
     private drawGridFlag: boolean = true;
@@ -63,11 +65,16 @@ class GameOfLife implements GameOfLifeType {
         this.fpsCounter = new Fps();
         this.fpsElement = document.getElementById('fps') as HTMLDivElement;
 
-        if (renderMode !== ORenderMode.Render2D) {
-            throw new Error(`Unsupported render mode: ${renderMode}`);
+        switch (renderMode) {
+            case ORenderMode.Render2D:
+                this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
+                break;
+            case ORenderMode.RenderWebGL:
+                this.renderContext = new RenderContextWebGL(canvas, this.memory, this.width, this.height);
+                break;
+            default:
+                throw new Error(`Unsupported render mode: ${renderMode}`);
         }
-
-        this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
     }
 
     static async create(
@@ -255,13 +262,13 @@ class GameOfLife implements GameOfLifeType {
         const row = Math.floor(y / (CELL_SIZE + 1));
         const column = Math.floor(x / (CELL_SIZE + 1));
         if (this.universe.get_cell) {
-            // If get_cell is available, only set if not already alive
+            // If "get_cell" is available, only set if not already alive
             if (this.universe.get_cell(row, column) !== Cell.Alive) {
                 this.universe.set_cell(row, column, Cell.Alive);
                 this.drawCells();
             }
         } else {
-            // Fallback: just set to alive
+            // Fallback: only set to alive
             this.universe.set_cell(row, column, Cell.Alive);
             this.drawCells();
         }
@@ -281,10 +288,11 @@ export async function initGameOfLife(
     canvas: HTMLCanvasElement,
     width: number = 128,
     height: number = 128,
-    initialState: StartType | null
+    initialState: StartType | null,
+    renderMode: RenderMode | null
 ): Promise<GameOfLife> {
 
-    let gol = await GameOfLife.create(canvas, width, height, initialState);
+    let gol = await GameOfLife.create(canvas, width, height, initialState, renderMode ?? ORenderMode.Render2D);
     gol.drawGrid();
     gol.drawCells();
 
