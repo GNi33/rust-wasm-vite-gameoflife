@@ -39,6 +39,9 @@ startTypeSelect.addEventListener('change', async (event) => {
 
         gameOfLife = null;
         gameOfLife = await initGameOfLife(canvas, parseInt(eventTarget.value, 10));
+
+        gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
+        gameOfLife.draw();
     }
 });
 
