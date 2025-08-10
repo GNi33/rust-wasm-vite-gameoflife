@@ -13,6 +13,8 @@ export default class RenderContextWebGL implements RenderContextInterface {
     private readonly width: number;
     private readonly height: number;
 
+    private drawGridFlag: boolean = true;
+
     private readonly buffers: { position: WebGLBuffer, uv: WebGLBuffer };
     private readonly programInfo: any;
 
@@ -56,8 +58,21 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
     }
 
-    drawGrid(): void {
+    clear(): void {
         // todo
+        return;
+    }
+
+    draw(cellsPtr: number): void {
+        this.drawCells(cellsPtr);
+    }
+
+    drawGrid(): void {
+        if(!this.drawGridFlag ) {
+            return;
+        }
+
+        // todo implement grid drawing
     }
 
     drawCells(cellsPtr: number): void {
@@ -102,6 +117,10 @@ export default class RenderContextWebGL implements RenderContextInterface {
         gl.bindTexture(gl.TEXTURE_2D, tex);
 
         this.drawScene(gl, this.programInfo);
+    }
+
+    setDrawGridFlag(flag: boolean): void {
+        this.drawGridFlag = flag;
     }
 
     private initBuffers(gl: WebGL2RenderingContext): { position: WebGLBuffer; uv: WebGLBuffer } {
