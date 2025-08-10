@@ -3,24 +3,27 @@ import {initGameOfLife} from "./src/modules/game_of_life";
 
 import {start_type_variants} from "playground";
 
-const startTypes = start_type_variants();
-let canvas: HTMLCanvasElement = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
-
-if (!canvas) {
-    console.error("Canvas element with id 'game-of-life-canvas' not found.");
-    throw new Error("Canvas element not found");
+function getElement<T extends HTMLElement>(id: string): T {
+    const el = document.getElementById(id);
+    if (!el) {
+        throw new Error(`Element with id '${id}' not found`);
+    }
+    return el as T;
 }
 
-const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
-const renderTypeSelect = document.getElementById('render-type-select') as HTMLSelectElement;
-const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
-const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInputElement;
-const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLSpanElement;
-const showGridCheckbox = document.getElementById('show-grid-cb') as HTMLInputElement;
+const startTypes = start_type_variants();
+let canvas = getElement<HTMLCanvasElement>('game-of-life-canvas');
 
-const universeWidthInput = document.getElementById('universe-size-width') as HTMLInputElement;
-const universeHeightInput = document.getElementById('universe-size-height') as HTMLInputElement;
-const setUniverseSizeButton = document.getElementById('set-universe-size-button') as HTMLButtonElement;
+const playPauseButton = getElement<HTMLButtonElement>('play-pause-button');
+const renderTypeSelect = getElement<HTMLSelectElement>('render-type-select');
+const startTypeSelect = getElement<HTMLSelectElement>('start-type-select');
+const ticksPerFrameInput = getElement<HTMLInputElement>('ticks-per-frame');
+const ticksPerFrameValue = getElement<HTMLSpanElement>('ticks-per-frame-value');
+const showGridCheckbox = getElement<HTMLInputElement>('show-grid-cb');
+
+const universeWidthInput = getElement<HTMLInputElement>('universe-size-width');
+const universeHeightInput = getElement<HTMLInputElement>('universe-size-height');
+const setUniverseSizeButton = getElement<HTMLButtonElement>('set-universe-size-button');
 
 let gameOfLife: GameOfLifeType | null = null;
 
@@ -39,24 +42,21 @@ for (const [_, value] of Object.entries(ORenderMode)) {
 }
 
 
-startTypeSelect.addEventListener('change', async (event) => {
-    let eventTarget = event.target as HTMLSelectElement;
 
+startTypeSelect.addEventListener('change', async (event: Event) => {
+    const eventTarget = event.target as HTMLSelectElement;
     if (eventTarget.value) {
         await initializeGameOfLife();
     }
 });
 
-renderTypeSelect.addEventListener('change', async (event) => {
-    let eventTarget = event.target as HTMLSelectElement;
-
+renderTypeSelect.addEventListener('change', async (event: Event) => {
+    const eventTarget = event.target as HTMLSelectElement;
     if (eventTarget.value) {
-
         // A canvas element cannot be reused with a different rendering context, so we need to create a new one.
-        let newCvs = canvas.cloneNode(false) as HTMLCanvasElement;
+        const newCvs = canvas.cloneNode(false) as HTMLCanvasElement;
         canvas.parentNode?.replaceChild(newCvs, canvas);
         canvas = newCvs;
-
         attachCanvasHandlers(canvas);
         await initializeGameOfLife();
     }
@@ -64,40 +64,37 @@ renderTypeSelect.addEventListener('change', async (event) => {
 
 playPauseButton.classList.add('js-state-paused');
 
-ticksPerFrameInput.addEventListener("change", (event) => {
-    let eventTarget = event.target as HTMLSelectElement;
 
+ticksPerFrameInput.addEventListener("change", (event: Event) => {
+    const eventTarget = event.target as HTMLInputElement;
     if (eventTarget.value) {
         if (!gameOfLife) {
             console.error("Game of Life instance is not initialized.");
             return;
         }
-
         const ticksPerFrame = parseInt(eventTarget.value, 10);
         gameOfLife.setTicksPerFrame(ticksPerFrame);
-
         ticksPerFrameValue.textContent = ticksPerFrame.toString();
     }
 });
 
-showGridCheckbox.addEventListener("change", (event) => {
-    let eventTarget = event.target as HTMLInputElement;
 
+showGridCheckbox.addEventListener("change", (event: Event) => {
+    const eventTarget = event.target as HTMLInputElement;
     const showGrid = eventTarget.checked;
-
     if (!gameOfLife) {
         console.error("Game of Life instance is not initialized.");
         return;
     }
-
     gameOfLife.setDrawGridFlag(showGrid);
     gameOfLife.draw();
 });
 
 let isMouseDown = false;
 
+
 const attachCanvasHandlers = (canvas: HTMLCanvasElement) => {
-    canvas.addEventListener("mousedown", (event) => {
+    canvas.addEventListener("mousedown", (event: MouseEvent) => {
         isMouseDown = true;
         if (!gameOfLife) {
             console.error("Game of Life instance is not initialized.");
@@ -116,7 +113,7 @@ const attachCanvasHandlers = (canvas: HTMLCanvasElement) => {
         }
     });
 
-    canvas.addEventListener("mousemove", (event) => {
+    canvas.addEventListener("mousemove", (event: MouseEvent) => {
         if (!isMouseDown) return;
         if (!gameOfLife) {
             console.error("Game of Life instance is not initialized.");
@@ -125,7 +122,6 @@ const attachCanvasHandlers = (canvas: HTMLCanvasElement) => {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-
         // Only set the cell to alive if not using shift or ctrl
         if (!event.shiftKey && !event.ctrlKey) {
             gameOfLife.setCellToAlive(x, y);
