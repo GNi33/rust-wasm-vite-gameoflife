@@ -17,6 +17,10 @@ const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInp
 const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLSpanElement;
 const showGridCheckbox = document.getElementById('show-grid-cb') as HTMLInputElement;
 
+const universeWidthInput = document.getElementById('universe-size-width') as HTMLInputElement;
+const universeHeightInput = document.getElementById('universe-size-height') as HTMLInputElement;
+const setUniverseSizeButton = document.getElementById('set-universe-size-button') as HTMLButtonElement;
+
 let gameOfLife: GameOfLifeType | null = null;
 
 startTypes.forEach((type, idx) => {
@@ -37,8 +41,11 @@ startTypeSelect.addEventListener('change', async (event) => {
             playPauseButton.classList.add('js-state-paused');
         }
 
+        const newWidth = parseInt(universeWidthInput.value, 10);
+        const newHeight = parseInt(universeHeightInput.value, 10);
+
         gameOfLife = null;
-        gameOfLife = await initGameOfLife(canvas, parseInt(eventTarget.value, 10));
+        gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, parseInt(eventTarget.value, 10));
 
         gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
         gameOfLife.draw();
@@ -94,6 +101,24 @@ playPauseButton.addEventListener('click', () => {
     }
 });
 
+setUniverseSizeButton.addEventListener('click', async () => {
+    const newWidth = parseInt(universeWidthInput.value, 10);
+    const newHeight = parseInt(universeHeightInput.value, 10);
+    const startType = parseInt(startTypeSelect.value, 10);
+
+    if (gameOfLife) {
+        gameOfLife.stop();
+        playPauseButton.classList.remove('js-state-playing');
+        playPauseButton.classList.add('js-state-paused');
+    }
+
+    gameOfLife = null;
+    gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, startType);
+
+    gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
+    gameOfLife.draw();
+})
+
 let isMouseDown = false;
 
 canvas.addEventListener("mousedown", (event) => {
@@ -135,4 +160,4 @@ document.addEventListener("mouseup", () => {
     isMouseDown = false;
 });
 
-gameOfLife = await initGameOfLife(canvas, 0);
+gameOfLife = await initGameOfLife(canvas, 128, 128, 0);

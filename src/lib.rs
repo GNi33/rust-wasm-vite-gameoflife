@@ -260,10 +260,7 @@ impl Universe {
         self.store.set_cell(idx, cell);
     }
 
-    pub fn new(start_type: StartType) -> Universe {
-        let width = 128;
-        let height = 128;
-
+    pub fn new(width: usize, height: usize, start_type: StartType) -> Universe {
         log!(
             "Initializing universe with width {} and height {}",
             width,

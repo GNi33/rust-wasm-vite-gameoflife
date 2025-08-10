@@ -16,6 +16,42 @@
             </div>
             <div class="flex-1">
                 <div class="flex flex-col gap-2">
+                    <div class="flex gap-1">
+                        <div class="flex-2">
+                            <label for="universe-size-width" class="block text-sm font-medium text-gray-700">Width</label>
+                            <input id="universe-size-width" type="number"
+                                   class="w-full bg-gray-100 border border-gray-300 text-gray-900
+                                          text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block
+                                          p-2.5"
+                                   value="128" min="1" max="10000" />
+                        </div>
+                        <div class="flex-2">
+                            <label for="universe-size-height" class="block text-sm font-medium text-gray-700">Height</label>
+                            <input id="universe-size-height" type="number"
+                                   class="w-full bg-gray-100 border border-gray-300 text-gray-900
+                                          text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block
+                                          p-2.5"
+                                   value="128" min="1" max="10000" />
+                        </div>
+                        <div class="flex flex-1 flex-col justify-end">
+                            <button
+                                    id="set-universe-size-button"
+                                    type="button"
+                                    class="
+                                        js-state-paused
+                                        w-full
+                                        cursor-pointer
+                                        text-white bg-blue-700 hover:bg-blue-800
+                                        dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800
+                                        focus:ring-4 focus:outline-none focus:ring-blue-300
+                                        font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center">
+                                <svg class="play-icon mx-auto" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">
+                                    <path fill="currentColor" d="M19 9V5h-4V3h6v6zM3 21v-6h2v4h4v2zm0-8v-2h2v2zm0-4V7h2v2zm0-4V3h2v2zm4 0V3h2v2zm4 16v-2h2v2zm0-16V3h2v2zm4 16v-2h2v2zm4 0v-2h2v2zm0-4v-2h2v2zm0-4v-2h2v2z"/>
+                                </svg>
+                                <span class="sr-only">Pause Icon</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="w-full">
                         <select
                                 id="start-type-select"
