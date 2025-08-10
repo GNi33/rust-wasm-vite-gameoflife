@@ -8,6 +8,7 @@ export default class RenderContext2D implements RenderContextInterface {
     private readonly memory: WebAssembly.Memory;
     private readonly width: number;
     private readonly height: number;
+    private drawGridFlag: boolean = true;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -27,8 +28,17 @@ export default class RenderContext2D implements RenderContextInterface {
         this.height = height;
     }
 
-    public drawGrid(): void {
+    public draw(cellsPtr: number): void {
+        this.clear();
+        this.drawGrid();
+        this.drawCells(cellsPtr);
+    }
+
+    public clear(): void {
         this.ctx.clearRect(0, 0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
+    }
+
+    public drawGrid(): void {
 
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;
@@ -59,8 +69,13 @@ export default class RenderContext2D implements RenderContextInterface {
         this.ctx.stroke();
     }
 
+    public setDrawGridFlag(flag: boolean): void {
+        this.drawGridFlag = flag;
+    }
+
     private fillCells(cells: Uint8Array, alive: boolean): void {
         const BIT_MASKS = [1,2,4,8,16,32,64,128];
+        const gridAddition = this.drawGridFlag ? 0 : 1;
         for (let row = 0; row < this.height; row++) {
             for (let column = 0; column < this.width; column++) {
                 const idx: number = this.getIndex(row, column);
@@ -77,8 +92,8 @@ export default class RenderContext2D implements RenderContextInterface {
                 this.ctx.fillRect(
                     column * (CELL_SIZE + 1) + 1,
                     row * (CELL_SIZE + 1) + 1,
-                    CELL_SIZE,
-                    CELL_SIZE
+                    CELL_SIZE + gridAddition,
+                    CELL_SIZE + gridAddition
                 );
             }
         }

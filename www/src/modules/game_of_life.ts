@@ -16,12 +16,14 @@ export type GameOfLifeType = {
     stop(): void;
     setTicksPerFrame: (ticks: number) => void;
     isPlaying(): boolean;
+    draw(): void;
     drawGrid(): void;
     drawCells(): void;
     toggleCell(x: number, y: number): void;
     setCellToAlive(x: number, y: number): void;
     insertGlider(x: number, y: number): void;
     insertPulsar(x: number, y: number): void;
+    setDrawGridFlag(flag: boolean): void;
 }
 
 export const ORenderMode = {
@@ -44,6 +46,8 @@ class GameOfLife implements GameOfLifeType {
     private fpsCounter: Fps;
     private readonly fpsElement: HTMLDivElement | null = null;
     private renderContext: RenderContextInterface;
+
+    private drawGridFlag: boolean = true;
 
     private constructor(
         memory: WebAssembly.Memory,
@@ -186,7 +190,18 @@ class GameOfLife implements GameOfLifeType {
         this.drawCells();
     }
 
+    public draw(): void {
+        this.renderContext.clear();
+        this.drawGrid();
+        this.drawCells();
+    }
+
     public drawGrid(): void {
+        if (!this.drawGridFlag) {
+            return;
+        }
+
+        this.renderContext.clear();
         this.renderContext.drawGrid();
         this.gridDrawn = true;
     }
@@ -256,13 +271,23 @@ class GameOfLife implements GameOfLifeType {
             this.drawCells();
         }
     }
+
+    public setDrawGridFlag(flag: boolean): void {
+        this.drawGridFlag = flag;
+        this.renderContext.setDrawGridFlag(flag);
+    }
 }
 
 function wrapIndex(index: number, max: number): number {
     return ((index % max) + max) % max;
 }
 
-export async function initGameOfLife(canvas: HTMLCanvasElement, initialState: StartType | null, renderMode: RenderMode | null): Promise<GameOfLife> {
+export async function initGameOfLife(
+    canvas: HTMLCanvasElement,
+    initialState: StartType | null,
+    renderMode: RenderMode | null
+): Promise<GameOfLife> {
+
     let gol = await GameOfLife.create(canvas, initialState, renderMode ?? ORenderMode.Render2D);
     gol.drawGrid();
     gol.drawCells();
