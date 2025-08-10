@@ -29,7 +29,6 @@ export default class RenderContext2D implements RenderContextInterface {
 
     public draw(cellsPtr: number): void {
         this.clear();
-
         this.drawGrid();
         this.drawCells(cellsPtr);
     }
