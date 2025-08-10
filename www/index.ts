@@ -18,6 +18,10 @@ const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInp
 const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLSpanElement;
 const showGridCheckbox = document.getElementById('show-grid-cb') as HTMLInputElement;
 
+const universeWidthInput = document.getElementById('universe-size-width') as HTMLInputElement;
+const universeHeightInput = document.getElementById('universe-size-height') as HTMLInputElement;
+const setUniverseSizeButton = document.getElementById('set-universe-size-button') as HTMLButtonElement;
+
 let gameOfLife: GameOfLifeType | null = null;
 
 startTypes.forEach((type, idx) => {
@@ -150,10 +154,15 @@ playPauseButton.addEventListener('click', () => {
     }
 });
 
+setUniverseSizeButton.addEventListener('click', async () => {
+    await initializeGameOfLife();
+})
 
 const initializeGameOfLife = async () => {
     const renderMode = renderTypeSelect.value;
     const startType = parseInt(startTypeSelect.value, 10);
+    const newWidth = parseInt(universeWidthInput.value, 10);
+    const newHeight = parseInt(universeHeightInput.value, 10);
 
     if (gameOfLife) {
         gameOfLife.stop();
@@ -162,7 +171,7 @@ const initializeGameOfLife = async () => {
     }
 
     gameOfLife = null;
-    gameOfLife = await initGameOfLife(canvas, startType, renderMode);
+    gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, startType, renderMode);
 
     gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
     gameOfLife.draw();
@@ -170,6 +179,6 @@ const initializeGameOfLife = async () => {
 
 (async () => {
     attachCanvasHandlers(canvas);
-    gameOfLife = await initGameOfLife(canvas, 0, ORenderMode.Render2D);
+    gameOfLife = await initGameOfLife(canvas, 128, 128, 0, ORenderMode.Render2D);
 })();
 
