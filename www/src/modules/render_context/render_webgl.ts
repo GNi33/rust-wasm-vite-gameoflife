@@ -80,7 +80,19 @@ export default class RenderContextWebGL implements RenderContextInterface {
             input[i * 4 + 3] = 255;
         }
 
-        const tex = this.createTextureWithGridData(gl, input, this.width, this.height);
+        function flipRows(input: Uint8Array, width: number, height: number): Uint8Array {
+            const output = new Uint8Array(input.length);
+            for (let row = 0; row < height; row++) {
+                const srcStart = row * width * 4;
+                const dstStart = (height - row - 1) * width * 4;
+                output.set(input.subarray(srcStart, srcStart + width * 4), dstStart);
+            }
+            return output;
+        }
+
+        const flippedInput = flipRows(input, gridWidth, gridHeight);
+
+        const tex = this.createTextureWithGridData(gl, flippedInput, this.width, this.height);
         const fb = this.createFramebuffer(gl);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
