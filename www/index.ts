@@ -14,6 +14,7 @@ if (!canvas) {
 const playPauseButton = document.getElementById('play-pause-button') as HTMLButtonElement;
 const startTypeSelect = document.getElementById('start-type-select') as HTMLSelectElement;
 const ticksPerFrameInput = document.getElementById('ticks-per-frame') as HTMLInputElement;
+const ticksPerFrameValue = document.getElementById('ticks-per-frame-value') as HTMLInputElement;
 
 let gameOfLife: GameOfLifeType | null = null;
 
@@ -53,6 +54,8 @@ ticksPerFrameInput.addEventListener("change", (event) => {
 
         const ticksPerFrame = parseInt(eventTarget.value, 10);
         gameOfLife.setTicksPerFrame(ticksPerFrame);
+
+        ticksPerFrameValue.textContent = ticksPerFrame.toString();
     }
 });
 
