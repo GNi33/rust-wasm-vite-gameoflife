@@ -1,0 +1,13 @@
+dist/
+node_modules/
+
+*.min.js
+**/*.html
+
+package.json
+package-lock.json
+
+vite.config.js
+eslint.config.js
+tsconfig.app.json
+tsconfig.json
