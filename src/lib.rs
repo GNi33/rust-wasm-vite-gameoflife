@@ -323,7 +323,7 @@ impl Universe {
     }
 
     // Returns a raw pointer to the cells for direct WebAssembly memory access from JS;
-    // *const Cell is a pointer type, not a dereference.
+    // *const u8 is a pointer type, not dereferencing.
     pub fn cells(&self) -> *const u8 {
         self.store.cells.as_ptr()
     }
