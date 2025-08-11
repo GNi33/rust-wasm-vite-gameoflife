@@ -33,6 +33,7 @@ const initializeGameOfLife = async () => {
     const startType = parseInt(startTypeSelect.value, 10);
     const newWidth = parseInt(universeWidthInput.value, 10);
     const newHeight = parseInt(universeHeightInput.value, 10);
+    const ticksPerFrame = parseInt(ticksPerFrameInput.value, 10);
 
     if (gameOfLife) {
         gameOfLife.stop();
@@ -44,6 +45,7 @@ const initializeGameOfLife = async () => {
     gameOfLife = await initGameOfLife(canvas, newWidth, newHeight, startType, renderMode);
 
     gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
+    gameOfLife.setTicksPerFrame(ticksPerFrame);
     gameOfLife.draw();
 }
 
