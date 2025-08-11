@@ -13,21 +13,6 @@ function getCanvas(): HTMLCanvasElement {
     return canvas;
 }
 
-// Centralized error handling utilities
-function handleError(message: string): void {
-    console.error(message);
-    // Todo: display in UI:
-    // showErrorInUI(message);
-}
-
-function ensureGameOfLife(game: GameOfLifeType | null): asserts game is GameOfLifeType {
-    if (!game) {
-        handleError("Game of Life instance is not initialized.");
-        throw new Error("Game of Life instance is not initialized.");
-    }
-}
-
-
 let canvas = getElement<HTMLCanvasElement>('game-of-life-canvas');
 
 const playPauseButton = getElement<HTMLButtonElement>('play-pause-button');

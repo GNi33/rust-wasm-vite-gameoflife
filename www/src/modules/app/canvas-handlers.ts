@@ -1,5 +1,6 @@
 // Canvas event listeners
 import type { GameOfLifeType } from '../types';
+import { handleError, ensureGameOfLife } from './error';
 
 let isMouseDown = false;
 
@@ -8,7 +9,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
         isMouseDown = true;
         const gameOfLife = getGameOfLife();
         try {
-            if (!gameOfLife) throw new Error("Game of Life instance is not initialized.");
+            ensureGameOfLife(gameOfLife);
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -20,6 +21,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
                 gameOfLife.toggleCell(x, y);
             }
         } catch (e) {
+            handleError((e as Error).message);
             return;
         }
     });
@@ -28,7 +30,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
         if (!isMouseDown) return;
         const gameOfLife = getGameOfLife();
         try {
-            if (!gameOfLife) throw new Error("Game of Life instance is not initialized.");
+            ensureGameOfLife(gameOfLife);
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -36,6 +38,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
                 gameOfLife.setCellToAlive(x, y);
             }
         } catch (e) {
+            handleError((e as Error).message);
             return;
         }
     });

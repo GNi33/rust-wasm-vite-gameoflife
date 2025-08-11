@@ -1,4 +1,5 @@
 import type { Controls, GameOfLifeType } from "../types";
+import { handleError, ensureGameOfLife } from './error';
 import { ORenderMode } from "../game_of_life";
 import { start_type_variants } from "playground";
 
@@ -65,10 +66,15 @@ export function setupControlHandlers(
         const eventTarget = event.target as HTMLInputElement;
         if (eventTarget.value) {
             const gameOfLife = getGameOfLife();
-            if (!gameOfLife) return;
-            const ticksPerFrame = parseInt(eventTarget.value, 10);
-            gameOfLife.setTicksPerFrame(ticksPerFrame);
-            ticksPerFrameValue.textContent = ticksPerFrame.toString();
+            try {
+                ensureGameOfLife(gameOfLife);
+                const ticksPerFrame = parseInt(eventTarget.value, 10);
+                gameOfLife.setTicksPerFrame(ticksPerFrame);
+                ticksPerFrameValue.textContent = ticksPerFrame.toString();
+            } catch (e) {
+                handleError((e as Error).message);
+                return;
+            }
         }
     });
 
@@ -76,22 +82,32 @@ export function setupControlHandlers(
         const eventTarget = event.target as HTMLInputElement;
         const showGrid = eventTarget.checked;
         const gameOfLife = getGameOfLife();
-        if (!gameOfLife) return;
-        gameOfLife.setDrawGridFlag(showGrid);
-        gameOfLife.draw();
+        try {
+            ensureGameOfLife(gameOfLife);
+            gameOfLife.setDrawGridFlag(showGrid);
+            gameOfLife.draw();
+        } catch (e) {
+            handleError((e as Error).message);
+            return;
+        }
     });
 
     playPauseButton.addEventListener('click', () => {
         const gameOfLife = getGameOfLife();
-        if (!gameOfLife) return;
-        if (gameOfLife.isPlaying()) {
-            gameOfLife.stop();
-            playPauseButton.classList.remove('js-state-playing');
-            playPauseButton.classList.add('js-state-paused');
-        } else {
-            gameOfLife.start();
-            playPauseButton.classList.add('js-state-playing');
-            playPauseButton.classList.remove('js-state-paused');
+        try {
+            ensureGameOfLife(gameOfLife);
+            if (gameOfLife.isPlaying()) {
+                gameOfLife.stop();
+                playPauseButton.classList.remove('js-state-playing');
+                playPauseButton.classList.add('js-state-paused');
+            } else {
+                gameOfLife.start();
+                playPauseButton.classList.add('js-state-playing');
+                playPauseButton.classList.remove('js-state-paused');
+            }
+        } catch (e) {
+            handleError((e as Error).message);
+            return;
         }
     });
 
