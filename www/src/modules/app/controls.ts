@@ -1,4 +1,4 @@
-import type { Controls, GameOfLifeType } from "./types";
+import type { Controls, GameOfLifeType } from "../types";
 import { ORenderMode } from "../game_of_life";
 import { start_type_variants } from "playground";
 

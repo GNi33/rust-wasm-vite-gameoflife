@@ -1,5 +1,5 @@
 // Canvas event listeners
-import type { GameOfLifeType } from './types';
+import type { GameOfLifeType } from '../types';
 
 let isMouseDown = false;
 

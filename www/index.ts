@@ -1,4 +1,4 @@
-import type { GameOfLifeType } from "./src/modules/app/types";
+import type { GameOfLifeType } from "./src/modules/types";
 import { ORenderMode } from "./src/modules/game_of_life";
 import { initGameOfLife } from "./src/modules/game_of_life";
 import { attachCanvasHandlers } from "./src/modules/app/canvas-handlers";
