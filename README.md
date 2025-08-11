@@ -21,8 +21,8 @@ The third stage is based on https://rustwasm.github.io/docs/book/game-of-life/in
 Game of Life using Rust and WebAssembly. The game logic is implemented in Rust, and the rendering is done using 
 the HTML5 canvas API. The project uses `wasm-bindgen` to facilitate communication between Rust and JavaScript. 
 It was implemented iteratively, starting with a simple rendering into the DOM, then switching to canvas rendering.
-First, a simple vector of cells was used, then there was a switch to a vector of u8, where each cell is represented
-by a single bit (0 for dead, 1 for alive) inside the u8.
+First, a simple vector of cells was used; then there was a switch to a vector of u8, where each cell is represented
+by a single bit (0 for dead cells, 1 for live cells) inside the u8.
 
 ### Step 4: Adding interactivity and UI
 The fourth stage is based on the previous step, but now we add interactivity and a simple UI.
