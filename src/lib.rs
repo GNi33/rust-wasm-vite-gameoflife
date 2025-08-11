@@ -1,4 +1,5 @@
 use std::fmt;
+use std::io::Error;
 use wasm_bindgen::prelude::*;
 use web_sys::js_sys;
 use timer::Timer;
@@ -19,7 +20,7 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn greet(name: &str) {
-    alert(format!("Hello, {}!", name).as_str());
+    alert(format!("Hello, {name}!").as_str());
 }
 
 #[wasm_bindgen]
@@ -68,18 +69,31 @@ pub struct Universe {
 }
 
 impl CellStore {
-    fn get_cell(&self, idx: usize) -> Cell {
+    fn get_cell(&self, idx: usize) -> Result<Cell, Error> {
+        if idx >= self.cells.len() * 8 {
+            log!("Index out of bounds: {}", idx);
+            return Err(Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "Cell index out of bounds"
+            ))
+        }
+
         let byte = self.cells[idx / 8];
         let bit = idx % 8;
-
         if (byte >> bit) & 1 == 1 {
-            Cell::Alive
+            Ok(Cell::Alive)
         } else {
-            Cell::Dead
+            Ok(Cell::Dead)
         }
     }
 
     fn set_cell(&mut self, idx: usize, cell: Cell) {
+
+        if idx >= self.cells.len() * 8 {
+            log!("Index out of bounds: {}", idx);
+            return;
+        }
+
         let byte = &mut self.cells[idx / 8];
         let bit = idx % 8;
 
@@ -108,6 +122,7 @@ impl Universe {
                 count += self
                     .store
                     .get_cell(self.get_index(neighbour_row, neighbour_column))
+                    .unwrap_or(Cell::Dead)
                     as u8;
             }
         }
@@ -160,7 +175,7 @@ fn init_cells_random(width: usize, height: usize) -> Vec<u8> {
 }
 
 fn init_cells_all_dead(width: usize, height: usize) -> Vec<u8> {
-    vec![Cell::Dead as u8; (width * height + 7) / 8]
+    vec![Cell::Dead as u8; (width * height).div_ceil(8)]
 }
 
 fn init_cells_spaceship(width: usize, height: usize) -> Vec<u8> {
@@ -187,9 +202,9 @@ impl fmt::Display for Universe {
                 } else {
                     '◼'
                 };
-                write!(f, "{}", symbol)?;
+                write!(f, "{symbol}")?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         Ok(())
@@ -213,7 +228,7 @@ impl Universe {
             for row in 0..self.height {
                 for col in 0..self.width {
                     let idx = self.get_index(row, col);
-                    let cell = next.get_cell(idx);
+                    let cell = next.get_cell(idx).unwrap_or(Cell::Dead);
 
                     let live_neighbors = self.live_neighbour_count(row, col);
 
@@ -245,7 +260,7 @@ impl Universe {
 
     pub fn toggle_cell(&mut self, row: usize, col: usize) {
         let idx = self.get_index(row, col);
-        let current_cell = self.store.get_cell(idx);
+        let current_cell = self.store.get_cell(idx).unwrap_or(Cell::Dead);
 
         let new_cell = match current_cell {
             Cell::Alive => Cell::Dead,
@@ -316,7 +331,7 @@ impl Universe {
     #[wasm_bindgen]
     pub fn get_cell(&self, row: usize, col: usize) -> Cell {
         let idx = self.get_index(row, col);
-        self.store.get_cell(idx)
+        self.store.get_cell(idx).unwrap_or(Cell::Dead)
     }
 }
 
