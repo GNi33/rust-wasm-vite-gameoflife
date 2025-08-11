@@ -31,12 +31,12 @@ export function setupControlHandlers(
             startTypeSelect.appendChild(option);
         });
 
-        for (const [_, value] of Object.entries(ORenderMode)) {
+        Object.entries(ORenderMode).forEach(([, value]) => {
             const option = document.createElement('option');
             option.value = value;
             option.textContent = value;
             renderTypeSelect.appendChild(option);
-        }
+        });
     })();
 
     startTypeSelect.addEventListener('change', async (event: Event) => {

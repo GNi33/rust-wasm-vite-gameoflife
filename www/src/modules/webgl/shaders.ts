@@ -26,7 +26,7 @@ function initWebGLProgram(
     return webGLProgram;
 }
 
-function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: any) {
+function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: string): WebGLShader {
     const shader = gl.createShader(type);
 
     if(!shader) {

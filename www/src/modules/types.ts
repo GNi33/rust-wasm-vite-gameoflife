@@ -23,3 +23,14 @@ export type GameOfLifeType = {
     insertPulsar(x: number, y: number): void;
     setDrawGridFlag(flag: boolean): void;
 }
+
+export type ProgramInfo = {
+    program: WebGLProgram,
+    attribLocations: {
+        positionLoc: GLint,
+        textureCoords: GLint
+    },
+    uniformLocations: {
+        texture: WebGLUniformLocation | null
+    },
+};

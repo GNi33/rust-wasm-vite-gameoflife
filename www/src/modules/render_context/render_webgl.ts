@@ -1,10 +1,11 @@
 import type {RenderContextInterface} from "./render_context_interface.ts";
 
-// @ts-ignore
+// @ts-expect-error: WebGL shader source unable to be loaded
 import shaderVert from "../webgl/shaders/vertex.glsl?raw";
-// @ts-ignore
+// @ts-expect-error: WebGL shader source unable to be loaded
 import shaderFrag from "../webgl/shaders/fragment.glsl?raw";
 import { initWebGLProgram } from "../webgl/shaders.ts";
+import type { ProgramInfo } from "../types.ts";
 
 export default class RenderContextWebGL implements RenderContextInterface {
 
@@ -16,7 +17,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
     private drawGridFlag: boolean = true;
 
     private readonly buffers: { position: WebGLBuffer, uv: WebGLBuffer };
-    private readonly programInfo: any;
+    private readonly programInfo: ProgramInfo;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -77,13 +78,13 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
     drawCells(cellsPtr: number): void {
 
-        let gl = this.ctx;
+        const gl = this.ctx;
 
         const numBytes = Math.ceil((this.width * this.height) / 8);
         const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
 
-        let gridWidth = this.width;
-        let gridHeight = this.height;
+        const gridWidth = this.width;
+        const gridHeight = this.height;
 
         const input = new Uint8Array(gridWidth * gridHeight * 4);
         for (let i = 0; i < gridWidth * gridHeight; i++) {
@@ -133,7 +134,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         };
     }
 
-    private drawScene(gl: WebGL2RenderingContext, programInfo: any) {
+    private drawScene(gl: WebGL2RenderingContext, programInfo: ProgramInfo): void {
         // Tell WebGL to use our program when drawing
         gl.useProgram(programInfo.program);
 
@@ -194,7 +195,11 @@ export default class RenderContextWebGL implements RenderContextInterface {
         return uvBuffer;
     }
 
-    private setUVAttribute(gl: WebGL2RenderingContext, uvBuffer: WebGLBuffer, programInfo: any) {
+    private setUVAttribute(
+        gl: WebGL2RenderingContext,
+        uvBuffer: WebGLBuffer,
+        programInfo: ProgramInfo
+    ): void {
         const numComponents = 2; // 2 values per UV coordinate
         const type = gl.FLOAT; // 32-bit float
         const normalize = false; // Don't normalize
@@ -213,7 +218,11 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute.
-    private setPositionAttribute(gl: WebGL2RenderingContext, buffer: WebGLBuffer, programInfo: any) {
+    private setPositionAttribute(
+        gl: WebGL2RenderingContext,
+        buffer: WebGLBuffer,
+        programInfo: ProgramInfo
+    ): void {
         const numComponents = 2; // pull out 2 values per iteration
         const type = gl.FLOAT; // the data in the buffer is 32bit floats
         const normalize = false; // don't normalize
@@ -232,8 +241,9 @@ export default class RenderContextWebGL implements RenderContextInterface {
         gl.enableVertexAttribArray(programInfo.attribLocations.positionLoc);
     }
 
-    private createTexture(gl: WebGLRenderingContext) {
+    private createTexture(gl: WebGLRenderingContext): WebGLTexture {
         const tex = gl.createTexture();
+
         if (tex === null) {
             throw Error("failed to create texture");
         }
@@ -244,6 +254,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
         return tex;
     }
 
@@ -252,7 +263,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         arr: ArrayBufferView | null,
         width: number,
         height: number
-    ) {
+    ): WebGLTexture {
         const srcWidth = width;
         const srcHeight = height;
 

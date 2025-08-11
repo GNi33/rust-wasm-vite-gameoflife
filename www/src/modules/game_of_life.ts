@@ -147,7 +147,7 @@ class GameOfLife implements GameOfLifeType {
 
         for (let it = 0; it < 2; it++) {
 
-            let rowOffset = it * 7;
+            const rowOffset = it * 7;
 
             if (it === 1) {
                 cellsToSet = cellsToSet.reverse();
@@ -202,7 +202,7 @@ class GameOfLife implements GameOfLifeType {
 
     private renderLoop = (): void => {
 
-        let fps = this.fpsCounter.clock();
+        const fps = this.fpsCounter.clock();
         this.renderFps(fps);
 
         this.animationFrameId = null;
@@ -279,7 +279,7 @@ export async function initGameOfLife(
     renderMode: RenderMode | null
 ): Promise<GameOfLife> {
 
-    let gol = await GameOfLife.create(canvas, width, height, initialState, renderMode ?? ORenderMode.Render2D);
+    const gol = await GameOfLife.create(canvas, width, height, initialState, renderMode ?? ORenderMode.Render2D);
     gol.drawGrid();
     gol.drawCells();
 
