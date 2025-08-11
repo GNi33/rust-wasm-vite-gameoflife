@@ -1,7 +1,7 @@
-import type { Controls, GameOfLifeType } from "../types";
+import type { Controls, GameOfLifeType } from '../types';
 import { handleError, ensureGameOfLife } from './error';
-import { ORenderMode } from "../game_of_life";
-import { start_type_variants } from "playground";
+import { ORenderMode } from '../game_of_life';
+import { start_type_variants } from 'playground';
 
 export function setupControlHandlers(
     getGameOfLife: () => GameOfLifeType | null,
@@ -9,7 +9,10 @@ export function setupControlHandlers(
     initializeGameOfLife: () => Promise<void>,
     getCanvas: () => HTMLCanvasElement,
     setCanvas: (c: HTMLCanvasElement) => void,
-    attachCanvasHandlers: (canvas: HTMLCanvasElement, getGameOfLife: () => GameOfLifeType | null) => void
+    attachCanvasHandlers: (
+        canvas: HTMLCanvasElement,
+        getGameOfLife: () => GameOfLifeType | null
+    ) => void
 ) {
     const {
         playPauseButton,
@@ -18,7 +21,7 @@ export function setupControlHandlers(
         ticksPerFrameInput,
         ticksPerFrameValue,
         showGridCheckbox,
-        setUniverseSizeButton
+        setUniverseSizeButton,
     } = controls;
 
     const startTypes = start_type_variants();
@@ -62,7 +65,7 @@ export function setupControlHandlers(
 
     playPauseButton.classList.add('js-state-paused');
 
-    ticksPerFrameInput.addEventListener("change", (event: Event) => {
+    ticksPerFrameInput.addEventListener('change', (event: Event) => {
         const eventTarget = event.target as HTMLInputElement;
         if (eventTarget.value) {
             const gameOfLife = getGameOfLife();
@@ -78,7 +81,7 @@ export function setupControlHandlers(
         }
     });
 
-    showGridCheckbox.addEventListener("change", (event: Event) => {
+    showGridCheckbox.addEventListener('change', (event: Event) => {
         const eventTarget = event.target as HTMLInputElement;
         const showGrid = eventTarget.checked;
         const gameOfLife = getGameOfLife();

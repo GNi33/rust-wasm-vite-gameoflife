@@ -4,8 +4,11 @@ import { handleError, ensureGameOfLife } from './error';
 
 let isMouseDown = false;
 
-export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: () => GameOfLifeType | null) {
-    canvas.addEventListener("mousedown", (event: MouseEvent) => {
+export function attachCanvasHandlers(
+    canvas: HTMLCanvasElement,
+    getGameOfLife: () => GameOfLifeType | null
+) {
+    canvas.addEventListener('mousedown', (event: MouseEvent) => {
         isMouseDown = true;
         const gameOfLife = getGameOfLife();
         try {
@@ -26,7 +29,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
         }
     });
 
-    canvas.addEventListener("mousemove", (event: MouseEvent) => {
+    canvas.addEventListener('mousemove', (event: MouseEvent) => {
         if (!isMouseDown) return;
         const gameOfLife = getGameOfLife();
         try {
@@ -43,7 +46,7 @@ export function attachCanvasHandlers(canvas: HTMLCanvasElement, getGameOfLife: (
         }
     });
 
-    document.addEventListener("mouseup", () => {
+    document.addEventListener('mouseup', () => {
         isMouseDown = false;
     });
 }

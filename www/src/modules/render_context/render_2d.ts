@@ -1,9 +1,8 @@
-import type {RenderContextInterface} from "./render_context_interface.ts";
-import {Cell} from "playground";
-import {ALIVE_COLOR, CELL_SIZE, DEAD_COLOR, GRID_COLOR} from "../game_of_life.ts";
+import type { RenderContextInterface } from './render_context_interface.ts';
+import { Cell } from 'playground';
+import { ALIVE_COLOR, CELL_SIZE, DEAD_COLOR, GRID_COLOR } from '../game_of_life.ts';
 
 export default class RenderContext2D implements RenderContextInterface {
-
     private readonly ctx: CanvasRenderingContext2D;
     private readonly memory: WebAssembly.Memory;
     private readonly width: number;
@@ -16,10 +15,9 @@ export default class RenderContext2D implements RenderContextInterface {
         width: number,
         height: number
     ) {
-
-        this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         if (!this.ctx) {
-            throw new Error("Failed to get 2D rendering context");
+            throw new Error('Failed to get 2D rendering context');
         }
 
         this.memory = memory;
@@ -35,11 +33,15 @@ export default class RenderContext2D implements RenderContextInterface {
     }
 
     public clear(): void {
-        this.ctx.clearRect(0, 0, (CELL_SIZE + 1) * this.width + 1, (CELL_SIZE + 1) * this.height + 1);
+        this.ctx.clearRect(
+            0,
+            0,
+            (CELL_SIZE + 1) * this.width + 1,
+            (CELL_SIZE + 1) * this.height + 1
+        );
     }
 
     public drawGrid(): void {
-
         this.ctx.beginPath();
         this.ctx.strokeStyle = GRID_COLOR;
         for (let i = 0; i <= this.width; i++) {
@@ -55,7 +57,6 @@ export default class RenderContext2D implements RenderContextInterface {
     }
 
     public drawCells(cellsPtr: number): void {
-
         const numBytes = Math.ceil((this.width * this.height) / 8);
         const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
         this.ctx.beginPath();
@@ -74,7 +75,7 @@ export default class RenderContext2D implements RenderContextInterface {
     }
 
     private fillCells(cells: Uint8Array, alive: boolean): void {
-        const BIT_MASKS = [1,2,4,8,16,32,64,128];
+        const BIT_MASKS = [1, 2, 4, 8, 16, 32, 64, 128];
         const gridAddition = this.drawGridFlag ? 0 : 1;
 
         for (let row = 0; row < this.height; row++) {
@@ -86,14 +87,14 @@ export default class RenderContext2D implements RenderContextInterface {
                 const cellByte = cells[byte];
                 const isAlive = (cellByte & mask) !== Cell.Dead;
 
-                if( isAlive !== alive) {
+                if (isAlive !== alive) {
                     continue;
                 }
 
                 let fillCol = column * (CELL_SIZE + 1);
                 let fillRow = row * (CELL_SIZE + 1);
 
-                if(this.drawGridFlag) {
+                if (this.drawGridFlag) {
                     fillCol += 1;
                     fillRow += 1;
                 }

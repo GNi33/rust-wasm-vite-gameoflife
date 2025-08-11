@@ -1,7 +1,7 @@
 function initWebGLProgram(
     gl: WebGL2RenderingContext,
     vertexShaderSrc: string,
-    fragmentShaderSrc: string,
+    fragmentShaderSrc: string
 ): WebGLProgram {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSrc);
     if (!vertexShader) {
@@ -20,7 +20,9 @@ function initWebGLProgram(
     gl.linkProgram(webGLProgram);
 
     if (!gl.getProgramParameter(webGLProgram, gl.LINK_STATUS)) {
-        throw new Error(`Unable to initialize the shader program: ${gl.getProgramInfoLog(webGLProgram)}`);
+        throw new Error(
+            `Unable to initialize the shader program: ${gl.getProgramInfoLog(webGLProgram)}`
+        );
     }
 
     return webGLProgram;
@@ -29,8 +31,8 @@ function initWebGLProgram(
 function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: string): WebGLShader {
     const shader = gl.createShader(type);
 
-    if(!shader) {
-        throw new Error("Unable to create shader");
+    if (!shader) {
+        throw new Error('Unable to create shader');
     }
 
     // Send the source to the shader object

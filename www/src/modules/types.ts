@@ -22,15 +22,15 @@ export type GameOfLifeType = {
     insertGlider(x: number, y: number): void;
     insertPulsar(x: number, y: number): void;
     setDrawGridFlag(flag: boolean): void;
-}
+};
 
 export type ProgramInfo = {
-    program: WebGLProgram,
+    program: WebGLProgram;
     attribLocations: {
-        positionLoc: GLint,
-        textureCoords: GLint
-    },
+        positionLoc: GLint;
+        textureCoords: GLint;
+    };
     uniformLocations: {
-        texture: WebGLUniformLocation | null
-    },
+        texture: WebGLUniformLocation | null;
+    };
 };

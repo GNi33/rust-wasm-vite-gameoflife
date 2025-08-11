@@ -1,9 +1,9 @@
-import type { GameOfLifeType } from "./src/modules/types";
-import { ORenderMode } from "./src/modules/game_of_life";
-import { initGameOfLife } from "./src/modules/game_of_life";
-import { attachCanvasHandlers } from "./src/modules/app/canvas-handlers";
-import { setupControlHandlers } from "./src/modules/app/controls";
-import { getElement } from "./src/modules/utils/dom";
+import type { GameOfLifeType } from './src/modules/types';
+import { ORenderMode } from './src/modules/game_of_life';
+import { initGameOfLife } from './src/modules/game_of_life';
+import { attachCanvasHandlers } from './src/modules/app/canvas-handlers';
+import { setupControlHandlers } from './src/modules/app/controls';
+import { getElement } from './src/modules/utils/dom';
 
 function setCanvas(newCanvas: HTMLCanvasElement) {
     canvas = newCanvas;
@@ -47,7 +47,7 @@ const initializeGameOfLife = async () => {
     gameOfLife.setDrawGridFlag(showGridCheckbox.checked);
     gameOfLife.setTicksPerFrame(ticksPerFrame);
     gameOfLife.draw();
-}
+};
 
 setupControlHandlers(
     () => gameOfLife,
@@ -58,7 +58,7 @@ setupControlHandlers(
         ticksPerFrameInput,
         ticksPerFrameValue,
         showGridCheckbox,
-        setUniverseSizeButton
+        setUniverseSizeButton,
     },
     initializeGameOfLife,
     getCanvas,

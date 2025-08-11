@@ -8,6 +8,6 @@ export function handleError(message: string): void {
 
 export function ensureGameOfLife(game: GameOfLifeType | null): asserts game is GameOfLifeType {
     if (!game) {
-        throw new Error("Game of Life instance is not initialized.");
+        throw new Error('Game of Life instance is not initialized.');
     }
 }

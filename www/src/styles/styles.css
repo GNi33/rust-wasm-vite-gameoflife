@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 #play-pause-button.js-state-paused .play-icon {
     display: block;
