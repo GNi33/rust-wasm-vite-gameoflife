@@ -1,6 +1,8 @@
 import init, {Cell, StartType, Universe} from "playground";
-import {Fps} from "./fps.ts";
-import type {RenderContextInterface} from "./render_context/render_context_interface.ts";
+import type { GameOfLifeType } from "./app/types.ts";
+import type { RenderContextInterface } from "./render_context/render_context_interface.ts";
+import { Fps } from "./app/fps.ts";
+
 import RenderContext2D from "./render_context/render_2d.ts";
 import RenderContextWebGL from "./render_context/render_webgl.ts";
 
@@ -10,21 +12,6 @@ export const DEAD_COLOR = "#FFFFFF";
 export const ALIVE_COLOR = "#000000";
 
 const wasm = await init();
-
-export type GameOfLifeType = {
-    start(): void;
-    stop(): void;
-    setTicksPerFrame: (ticks: number) => void;
-    isPlaying(): boolean;
-    draw(): void;
-    drawGrid(): void;
-    drawCells(): void;
-    toggleCell(x: number, y: number): void;
-    setCellToAlive(x: number, y: number): void;
-    insertGlider(x: number, y: number): void;
-    insertPulsar(x: number, y: number): void;
-    setDrawGridFlag(flag: boolean): void;
-}
 
 export const ORenderMode = {
     Render2D : "2D",

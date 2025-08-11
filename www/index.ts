@@ -1,14 +1,16 @@
-import {type GameOfLifeType, ORenderMode} from "./src/modules/game_of_life";
-import {initGameOfLife} from "./src/modules/game_of_life";
+import type { GameOfLifeType } from "./src/modules/app/types";
+import { ORenderMode } from "./src/modules/game_of_life";
+import { initGameOfLife } from "./src/modules/game_of_life";
+import { attachCanvasHandlers } from "./src/modules/app/canvas-handlers";
+import { setupControlHandlers } from "./src/modules/app/controls";
+import { getElement } from "./src/modules/utils/dom";
 
-import {start_type_variants} from "playground";
+function setCanvas(newCanvas: HTMLCanvasElement) {
+    canvas = newCanvas;
+}
 
-function getElement<T extends HTMLElement>(id: string): T {
-    const el = document.getElementById(id);
-    if (!el) {
-        throw new Error(`Element with id '${id}' not found`);
-    }
-    return el as T;
+function getCanvas(): HTMLCanvasElement {
+    return canvas;
 }
 
 // Centralized error handling utilities
@@ -25,7 +27,7 @@ function ensureGameOfLife(game: GameOfLifeType | null): asserts game is GameOfLi
     }
 }
 
-const startTypes = start_type_variants();
+
 let canvas = getElement<HTMLCanvasElement>('game-of-life-canvas');
 
 const playPauseButton = getElement<HTMLButtonElement>('play-pause-button');
@@ -40,137 +42,6 @@ const universeHeightInput = getElement<HTMLInputElement>('universe-size-height')
 const setUniverseSizeButton = getElement<HTMLButtonElement>('set-universe-size-button');
 
 let gameOfLife: GameOfLifeType | null = null;
-
-startTypes.forEach((type, idx) => {
-    const option = document.createElement('option');
-    option.value = idx.toString();
-    option.textContent = type;
-    startTypeSelect.appendChild(option);
-});
-
-for (const [_, value] of Object.entries(ORenderMode)) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    renderTypeSelect.appendChild(option);
-}
-
-
-
-startTypeSelect.addEventListener('change', async (event: Event) => {
-    const eventTarget = event.target as HTMLSelectElement;
-    if (eventTarget.value) {
-        await initializeGameOfLife();
-    }
-});
-
-renderTypeSelect.addEventListener('change', async (event: Event) => {
-    const eventTarget = event.target as HTMLSelectElement;
-    if (eventTarget.value) {
-        // A canvas element cannot be reused with a different rendering context, so we need to create a new one.
-        const newCvs = canvas.cloneNode(false) as HTMLCanvasElement;
-        canvas.parentNode?.replaceChild(newCvs, canvas);
-        canvas = newCvs;
-        attachCanvasHandlers(canvas);
-        await initializeGameOfLife();
-    }
-});
-
-playPauseButton.classList.add('js-state-paused');
-
-
-ticksPerFrameInput.addEventListener("change", (event: Event) => {
-    const eventTarget = event.target as HTMLInputElement;
-    if (eventTarget.value) {
-        try {
-            ensureGameOfLife(gameOfLife);
-            const ticksPerFrame = parseInt(eventTarget.value, 10);
-            gameOfLife.setTicksPerFrame(ticksPerFrame);
-            ticksPerFrameValue.textContent = ticksPerFrame.toString();
-        } catch (e) {
-            return;
-        }
-    }
-});
-
-
-showGridCheckbox.addEventListener("change", (event: Event) => {
-    const eventTarget = event.target as HTMLInputElement;
-    const showGrid = eventTarget.checked;
-    try {
-        ensureGameOfLife(gameOfLife);
-        gameOfLife.setDrawGridFlag(showGrid);
-        gameOfLife.draw();
-    } catch (e) {
-        return;
-    }
-});
-
-let isMouseDown = false;
-
-
-const attachCanvasHandlers = (canvas: HTMLCanvasElement) => {
-    canvas.addEventListener("mousedown", (event: MouseEvent) => {
-        isMouseDown = true;
-        try {
-            ensureGameOfLife(gameOfLife);
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            if (event.shiftKey) {
-                gameOfLife.insertPulsar(x, y);
-            } else if (event.ctrlKey) {
-                gameOfLife.insertGlider(x, y);
-            } else {
-                // On click: toggle cell (so clicking a cell in a "live" state sets it to "dead")
-                gameOfLife.toggleCell(x, y);
-            }
-        } catch (e) {
-            return;
-        }
-    });
-
-    canvas.addEventListener("mousemove", (event: MouseEvent) => {
-        if (!isMouseDown) return;
-        try {
-            ensureGameOfLife(gameOfLife);
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            // Only set the cell to alive if not using shift or ctrl
-            if (!event.shiftKey && !event.ctrlKey) {
-                gameOfLife.setCellToAlive(x, y);
-            }
-        } catch (e) {
-            return;
-        }
-    });
-
-    document.addEventListener("mouseup", () => {
-        isMouseDown = false;
-    });
-}
-
-playPauseButton.addEventListener('click', () => {
-    try {
-        ensureGameOfLife(gameOfLife);
-        if (gameOfLife.isPlaying()) {
-            gameOfLife.stop();
-            playPauseButton.classList.remove('js-state-playing');
-            playPauseButton.classList.add('js-state-paused');
-        } else {
-            gameOfLife.start();
-            playPauseButton.classList.add('js-state-playing');
-            playPauseButton.classList.remove('js-state-paused');
-        }
-    } catch (e) {
-        return;
-    }
-});
-
-setUniverseSizeButton.addEventListener('click', async () => {
-    await initializeGameOfLife();
-})
 
 const initializeGameOfLife = async () => {
     const renderMode = renderTypeSelect.value;
@@ -191,8 +62,24 @@ const initializeGameOfLife = async () => {
     gameOfLife.draw();
 }
 
-(async () => {
-    attachCanvasHandlers(canvas);
-    gameOfLife = await initGameOfLife(canvas, 128, 128, 0, ORenderMode.Render2D);
-})();
+setupControlHandlers(
+    () => gameOfLife,
+    {
+        playPauseButton,
+        renderTypeSelect,
+        startTypeSelect,
+        ticksPerFrameInput,
+        ticksPerFrameValue,
+        showGridCheckbox,
+        setUniverseSizeButton
+    },
+    initializeGameOfLife,
+    getCanvas,
+    setCanvas,
+    attachCanvasHandlers
+);
 
+(async () => {
+    gameOfLife = await initGameOfLife(canvas, 128, 128, 0, ORenderMode.Render2D);
+    attachCanvasHandlers(canvas, () => gameOfLife);
+})();
