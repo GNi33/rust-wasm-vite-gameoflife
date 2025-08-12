@@ -1,37 +1,24 @@
-import init, {Cell, StartType, Universe} from "playground";
-import {Fps} from "./fps.ts";
-import type {RenderContextInterface} from "./render_context/render_context_interface.ts";
-import RenderContext2D from "./render_context/render_2d.ts";
-import RenderContextWebGL from "./render_context/render_webgl.ts";
+import init, { Cell, StartType, Universe } from 'playground';
+import type { GameOfLifeType } from './types.ts';
+import type { RenderContextInterface } from './render_context/render_context_interface.ts';
+import { Fps } from './app/fps.ts';
+
+import RenderContext2D from './render_context/render_2d.ts';
+import RenderContextWebGL from './render_context/render_webgl.ts';
 
 export const CELL_SIZE = 5;
-export const GRID_COLOR = "#CCCCCC";
-export const DEAD_COLOR = "#FFFFFF";
-export const ALIVE_COLOR = "#000000";
+export const GRID_COLOR = '#CCCCCC';
+export const DEAD_COLOR = '#FFFFFF';
+export const ALIVE_COLOR = '#000000';
 
 const wasm = await init();
 
-export type GameOfLifeType = {
-    start(): void;
-    stop(): void;
-    setTicksPerFrame: (ticks: number) => void;
-    isPlaying(): boolean;
-    draw(): void;
-    drawGrid(): void;
-    drawCells(): void;
-    toggleCell(x: number, y: number): void;
-    setCellToAlive(x: number, y: number): void;
-    insertGlider(x: number, y: number): void;
-    insertPulsar(x: number, y: number): void;
-    setDrawGridFlag(flag: boolean): void;
-}
-
 export const ORenderMode = {
-    Render2D : "2D",
-    RenderWebGL : "WebGL",
-}
+    Render2D: '2D',
+    RenderWebGL: 'WebGL',
+};
 
-type RenderMode = typeof ORenderMode[keyof typeof ORenderMode];
+type RenderMode = (typeof ORenderMode)[keyof typeof ORenderMode];
 
 class GameOfLife implements GameOfLifeType {
     private readonly memory: WebAssembly.Memory;
@@ -55,7 +42,7 @@ class GameOfLife implements GameOfLifeType {
         universe: Universe,
         width: number,
         height: number,
-        renderMode: RenderMode = ORenderMode.Render2D,
+        renderMode: RenderMode = ORenderMode.Render2D
     ) {
         this.memory = memory;
         this.universe = universe;
@@ -67,10 +54,20 @@ class GameOfLife implements GameOfLifeType {
 
         switch (renderMode) {
             case ORenderMode.Render2D:
-                this.renderContext = new RenderContext2D(canvas, this.memory, this.width, this.height);
+                this.renderContext = new RenderContext2D(
+                    canvas,
+                    this.memory,
+                    this.width,
+                    this.height
+                );
                 break;
             case ORenderMode.RenderWebGL:
-                this.renderContext = new RenderContextWebGL(canvas, this.memory, this.width, this.height);
+                this.renderContext = new RenderContextWebGL(
+                    canvas,
+                    this.memory,
+                    this.width,
+                    this.height
+                );
                 break;
             default:
                 throw new Error(`Unsupported render mode: ${renderMode}`);
@@ -84,10 +81,13 @@ class GameOfLife implements GameOfLifeType {
         initialState: StartType | null,
         renderMode: RenderMode = ORenderMode.Render2D
     ): Promise<GameOfLife> {
-
         const memory: WebAssembly.Memory = wasm.memory;
 
-        const universe = Universe.new(universeWidth, universeHeight, initialState ?? StartType.Default);
+        const universe = Universe.new(
+            universeWidth,
+            universeHeight,
+            initialState ?? StartType.Default
+        );
         const width = universe.width();
         const height = universe.height();
 
@@ -106,7 +106,6 @@ class GameOfLife implements GameOfLifeType {
     }
 
     public toggleCell(x: number, y: number): void {
-
         const row = Math.floor(y / (CELL_SIZE + 1));
         const column = Math.floor(x / (CELL_SIZE + 1));
 
@@ -150,26 +149,23 @@ class GameOfLife implements GameOfLifeType {
         this.universe.set_cell(row, column, Cell.Dead);
 
         let cellsToSet = [
-            [0,0,1,1,1,0,0,0,1,1,1,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [1,0,0,0,0,1,0,1,0,0,0,0,1],
-            [1,0,0,0,0,1,0,1,0,0,0,0,1],
-            [1,0,0,0,0,1,0,1,0,0,0,0,1],
-            [0,0,1,1,1,0,0,0,1,1,1,0,0],
+            [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+            [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
         ];
 
         for (let it = 0; it < 2; it++) {
-
-            let rowOffset = it * 7;
+            const rowOffset = it * 7;
 
             if (it === 1) {
                 cellsToSet = cellsToSet.reverse();
             }
 
             for (let rowIdx = 0; rowIdx < cellsToSet.length; rowIdx++) {
-
                 for (let cellIdx = 0; cellIdx < cellsToSet[rowIdx].length; cellIdx++) {
-
                     this.universe.set_cell(
                         wrapIndex(row + rowIdx - 6 + rowOffset, this.height),
                         wrapIndex(column + cellIdx - 6, this.width),
@@ -178,7 +174,7 @@ class GameOfLife implements GameOfLifeType {
                 }
             }
 
-            if( it === 0) {
+            if (it === 0) {
                 for (let cellIdx = 0; cellIdx < 13; cellIdx++) {
                     this.universe.set_cell(
                         row,
@@ -214,8 +210,7 @@ class GameOfLife implements GameOfLifeType {
     }
 
     private renderLoop = (): void => {
-
-        let fps = this.fpsCounter.clock();
+        const fps = this.fpsCounter.clock();
         this.renderFps(fps);
 
         this.animationFrameId = null;
@@ -230,7 +225,6 @@ class GameOfLife implements GameOfLifeType {
     };
 
     public start(): void {
-
         if (!this.gridDrawn) {
             this.drawGrid();
         }
@@ -252,8 +246,7 @@ class GameOfLife implements GameOfLifeType {
     }
 
     private renderFps(fps: number) {
-
-        if( this.fpsElement) {
+        if (this.fpsElement) {
             this.fpsElement.textContent = `${fps}`;
         }
     }
@@ -291,8 +284,13 @@ export async function initGameOfLife(
     initialState: StartType | null,
     renderMode: RenderMode | null
 ): Promise<GameOfLife> {
-
-    let gol = await GameOfLife.create(canvas, width, height, initialState, renderMode ?? ORenderMode.Render2D);
+    const gol = await GameOfLife.create(
+        canvas,
+        width,
+        height,
+        initialState,
+        renderMode ?? ORenderMode.Render2D
+    );
     gol.drawGrid();
     gol.drawCells();
 

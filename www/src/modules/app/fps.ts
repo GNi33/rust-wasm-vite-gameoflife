@@ -1,5 +1,4 @@
 export class Fps {
-
     private frames: number[];
     private lastTimestamp: number;
 
@@ -14,7 +13,7 @@ export class Fps {
 
         this.lastTimestamp = now;
 
-        const fps = 1 / delta * 1000;
+        const fps = (1 / delta) * 1000;
 
         this.frames.push(fps);
         if (this.frames.length > 100) {

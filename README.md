@@ -17,18 +17,31 @@ in the index.html file. I moved the math package to a separate file, just to see
 the binding attributes there as well.
 
 ### Step 3: A Game Of Life implementation using wasm_bindgen and canvas
-The third stage is based on https://rustwasm.github.io/book/game-of-life. It is a simple implementation of the
+The third stage is based on https://rustwasm.github.io/docs/book/game-of-life/introduction.html. It is a simple implementation of the
 Game of Life using Rust and WebAssembly. The game logic is implemented in Rust, and the rendering is done using 
 the HTML5 canvas API. The project uses `wasm-bindgen` to facilitate communication between Rust and JavaScript. 
 It was implemented iteratively, starting with a simple rendering into the DOM, then switching to canvas rendering.
-First, a simple vector of cells was used, then there was a switch to a vector of u8, where each cell is represented
-by a single bit (0 for dead, 1 for alive) inside the u8.
+First, a simple vector of cells was used; then there was a switch to a vector of u8, where each cell is represented
+by a single bit (0 for dead cells, 1 for live cells) inside the u8.
 
 ### Step 4: Adding interactivity and UI
 The fourth stage is based on the previous step, but now we add interactivity and a simple UI.
+
+### Step 5: WebGL rendering
+The fifth stage is based on the previous step again but adds more interactive elements. 
+Most notably, the user can choose between two different rendering modes, as now rendering using WebGL is implemented.
+Includes several fixes and a refactoring of the TypeScript code.
 
 ## Build
 
 ```bash
 wasm-pack build --target web
+```
+
+## Test
+
+For any tests using the `#[wasm_bindgen_test]` macro:
+
+```bash
+wasm-pack test --node
 ```

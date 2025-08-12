@@ -1,13 +1,13 @@
-import type {RenderContextInterface} from "./render_context_interface.ts";
+import type { RenderContextInterface } from './render_context_interface.ts';
 
-// @ts-ignore
-import shaderVert from "../webgl/shaders/vertex.glsl?raw";
-// @ts-ignore
-import shaderFrag from "../webgl/shaders/fragment.glsl?raw";
-import { initWebGLProgram } from "../webgl/shaders.ts";
+// @ts-expect-error: WebGL shader source unable to be loaded
+import shaderVert from '../webgl/shaders/vertex.glsl?raw';
+// @ts-expect-error: WebGL shader source unable to be loaded
+import shaderFrag from '../webgl/shaders/fragment.glsl?raw';
+import { initWebGLProgram } from '../webgl/shaders.ts';
+import type { ProgramInfo } from '../types.ts';
 
 export default class RenderContextWebGL implements RenderContextInterface {
-
     private readonly ctx: WebGL2RenderingContext;
     private readonly memory: WebAssembly.Memory;
     private readonly width: number;
@@ -15,8 +15,8 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
     private drawGridFlag: boolean = true;
 
-    private readonly buffers: { position: WebGLBuffer, uv: WebGLBuffer };
-    private readonly programInfo: any;
+    private readonly buffers: { position: WebGLBuffer; uv: WebGLBuffer };
+    private readonly programInfo: ProgramInfo;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -24,11 +24,10 @@ export default class RenderContextWebGL implements RenderContextInterface {
         width: number,
         height: number
     ) {
-
-        this.ctx = canvas.getContext("webgl2") as WebGL2RenderingContext;
+        this.ctx = canvas.getContext('webgl2') as WebGL2RenderingContext;
 
         if (!this.ctx) {
-            throw new Error("Failed to get WebGL rendering context");
+            throw new Error('Failed to get WebGL rendering context');
         }
 
         this.memory = memory;
@@ -41,11 +40,11 @@ export default class RenderContextWebGL implements RenderContextInterface {
         this.programInfo = {
             program: shaderProgram,
             attribLocations: {
-                positionLoc: this.ctx.getAttribLocation(shaderProgram, "a_position"),
-                textureCoords: this.ctx.getAttribLocation(shaderProgram, "a_texCoord")
+                positionLoc: this.ctx.getAttribLocation(shaderProgram, 'a_position'),
+                textureCoords: this.ctx.getAttribLocation(shaderProgram, 'a_texCoord'),
             },
             uniformLocations: {
-                texture: this.ctx.getUniformLocation(shaderProgram, "u_texture")
+                texture: this.ctx.getUniformLocation(shaderProgram, 'u_texture'),
             },
         };
 
@@ -55,7 +54,6 @@ export default class RenderContextWebGL implements RenderContextInterface {
         // buffer into the vertexPosition attribute.
         this.setPositionAttribute(this.ctx, this.buffers.position, this.programInfo);
         this.setUVAttribute(this.ctx, this.buffers.uv, this.programInfo);
-
     }
 
     clear(): void {
@@ -68,7 +66,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
     }
 
     drawGrid(): void {
-        if(!this.drawGridFlag ) {
+        if (!this.drawGridFlag) {
             return;
         }
 
@@ -76,18 +74,17 @@ export default class RenderContextWebGL implements RenderContextInterface {
     }
 
     drawCells(cellsPtr: number): void {
-
-        let gl = this.ctx;
+        const gl = this.ctx;
 
         const numBytes = Math.ceil((this.width * this.height) / 8);
         const cells: Uint8Array = new Uint8Array(this.memory.buffer, cellsPtr, numBytes);
 
-        let gridWidth = this.width;
-        let gridHeight = this.height;
+        const gridWidth = this.width;
+        const gridHeight = this.height;
 
         const input = new Uint8Array(gridWidth * gridHeight * 4);
         for (let i = 0; i < gridWidth * gridHeight; i++) {
-            const alive = (cells[Math.floor(i / 8)] >> (i % 8)) & 1;
+            const alive = (cells[Math.floor(i / 8)] >> i % 8) & 1;
             const v = alive ? 255 : 0; // Black for alive, white for dead
             input[i * 4 + 0] = v;
             input[i * 4 + 1] = v;
@@ -133,7 +130,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         };
     }
 
-    private drawScene(gl: WebGL2RenderingContext, programInfo: any) {
+    private drawScene(gl: WebGL2RenderingContext, programInfo: ProgramInfo): void {
         // Tell WebGL to use our program when drawing
         gl.useProgram(programInfo.program);
 
@@ -144,16 +141,8 @@ export default class RenderContextWebGL implements RenderContextInterface {
     }
 
     private initPositionBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
-
         // create an array of positions for the square.
-        const positions = [
-            -1.0, -1.0,
-            -1.0,  1.0,
-             1.0, -1.0,
-             1.0,  1.0,
-            -1.0,  1.0,
-             1.0, -1.0,
-        ];
+        const positions = [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0];
 
         // Create a buffer for the square's positions.
         const positionBuffer = gl.createBuffer();
@@ -171,15 +160,20 @@ export default class RenderContextWebGL implements RenderContextInterface {
     }
 
     private initUVBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
-
         // Define UV coordinates for a fullscreen quad
         const uvCoordinates = [
-            0.0, 0.0, // Bottom-left
-            0.0, 1.0, // Top-left
-            1.0, 0.0, // Bottom-right
-            1.0, 1.0, // Top-right
-            0.0, 1.0,
-            1.0, 0.0, // Repeat the last two for the triangle strip
+            0.0,
+            0.0, // Bottom-left
+            0.0,
+            1.0, // Top-left
+            1.0,
+            0.0, // Bottom-right
+            1.0,
+            1.0, // Top-right
+            0.0,
+            1.0,
+            1.0,
+            0.0, // Repeat the last two for the triangle strip
         ];
 
         // Create a buffer for the UV coordinates
@@ -194,7 +188,11 @@ export default class RenderContextWebGL implements RenderContextInterface {
         return uvBuffer;
     }
 
-    private setUVAttribute(gl: WebGL2RenderingContext, uvBuffer: WebGLBuffer, programInfo: any) {
+    private setUVAttribute(
+        gl: WebGL2RenderingContext,
+        uvBuffer: WebGLBuffer,
+        programInfo: ProgramInfo
+    ): void {
         const numComponents = 2; // 2 values per UV coordinate
         const type = gl.FLOAT; // 32-bit float
         const normalize = false; // Don't normalize
@@ -205,7 +203,14 @@ export default class RenderContextWebGL implements RenderContextInterface {
         gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
 
         // Set up the attribute pointer
-        gl.vertexAttribPointer(programInfo.attribLocations.textureCoords, numComponents, type, normalize, stride, offset);
+        gl.vertexAttribPointer(
+            programInfo.attribLocations.textureCoords,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset
+        );
 
         // Enable the attribute
         gl.enableVertexAttribArray(programInfo.attribLocations.textureCoords);
@@ -213,7 +218,11 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute.
-    private setPositionAttribute(gl: WebGL2RenderingContext, buffer: WebGLBuffer, programInfo: any) {
+    private setPositionAttribute(
+        gl: WebGL2RenderingContext,
+        buffer: WebGLBuffer,
+        programInfo: ProgramInfo
+    ): void {
         const numComponents = 2; // pull out 2 values per iteration
         const type = gl.FLOAT; // the data in the buffer is 32bit floats
         const normalize = false; // don't normalize
@@ -227,15 +236,16 @@ export default class RenderContextWebGL implements RenderContextInterface {
             type,
             normalize,
             stride,
-            offset,
+            offset
         );
         gl.enableVertexAttribArray(programInfo.attribLocations.positionLoc);
     }
 
-    private createTexture(gl: WebGLRenderingContext) {
+    private createTexture(gl: WebGLRenderingContext): WebGLTexture {
         const tex = gl.createTexture();
+
         if (tex === null) {
-            throw Error("failed to create texture");
+            throw Error('failed to create texture');
         }
 
         gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -244,6 +254,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
         return tex;
     }
 
@@ -252,7 +263,7 @@ export default class RenderContextWebGL implements RenderContextInterface {
         arr: ArrayBufferView | null,
         width: number,
         height: number
-    ) {
+    ): WebGLTexture {
         const srcWidth = width;
         const srcHeight = height;
 
@@ -260,24 +271,24 @@ export default class RenderContextWebGL implements RenderContextInterface {
 
         gl.texImage2D(
             gl.TEXTURE_2D,
-            0,                // mip level
-            gl.RGBA,          // internal format
+            0, // mip level
+            gl.RGBA, // internal format
             srcWidth,
             srcHeight,
-            0,                // border
-            gl.RGBA,          // format
+            0, // border
+            gl.RGBA, // format
             gl.UNSIGNED_BYTE, // type
-            arr);
+            arr
+        );
         return tex;
     }
 
     private createFramebuffer(gl: WebGLRenderingContext): WebGLFramebuffer {
         const fb = gl.createFramebuffer();
         if (fb === null) {
-            throw Error("failed to create framebuffer");
+            throw Error('failed to create framebuffer');
         }
         gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
         return fb;
     }
-
 }

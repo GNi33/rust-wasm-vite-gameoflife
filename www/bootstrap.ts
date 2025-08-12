@@ -1,3 +1,2 @@
 // ...existing code...
-import("./index.ts")
-    .catch((e: unknown) => console.error("Error importing `index.ts`:", e));
+import('./index.ts').catch((e: unknown) => console.error('Error importing `index.ts`:', e));
