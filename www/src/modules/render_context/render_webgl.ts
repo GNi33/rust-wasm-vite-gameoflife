@@ -7,6 +7,8 @@ import shaderFrag from '../webgl/shaders/fragment.glsl?raw';
 import { initWebGLProgram } from '../webgl/shaders.ts';
 import type { ProgramInfo } from '../types.ts';
 
+import { CELL_SIZE } from '../game_of_life.ts';
+
 export default class RenderContextWebGL implements RenderContextInterface {
     private readonly ctx: WebGL2RenderingContext;
     private readonly memory: WebAssembly.Memory;
@@ -45,6 +47,10 @@ export default class RenderContextWebGL implements RenderContextInterface {
             },
             uniformLocations: {
                 texture: this.ctx.getUniformLocation(shaderProgram, 'u_texture'),
+                resolution: this.ctx.getUniformLocation(shaderProgram, 'u_resolution'),
+                gridSize: this.ctx.getUniformLocation(shaderProgram, 'u_gridSize'),
+                gridWidth: this.ctx.getUniformLocation(shaderProgram, 'u_gridWidth'),
+                showGrid: this.ctx.getUniformLocation(shaderProgram, 'u_showGrid'),
             },
         };
 
@@ -57,20 +63,20 @@ export default class RenderContextWebGL implements RenderContextInterface {
     }
 
     clear(): void {
-        // todo
-        return;
+        const gl = this.ctx;
+        gl.clearColor(1.0, 1.0, 1.0, 1.0); // White background
+        gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
     draw(cellsPtr: number): void {
+        this.clear();
         this.drawCells(cellsPtr);
     }
 
     drawGrid(): void {
-        if (!this.drawGridFlag) {
-            return;
-        }
-
-        // todo implement grid drawing
+        // Grid is now rendered as part of drawCells through the shader
+        // This method is kept for interface compatibility
+        return;
     }
 
     drawCells(cellsPtr: number): void {
@@ -134,8 +140,17 @@ export default class RenderContextWebGL implements RenderContextInterface {
         // Tell WebGL to use our program when drawing
         gl.useProgram(programInfo.program);
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        // Set uniforms
+        gl.uniform1i(programInfo.uniformLocations.texture, 0);
+        gl.uniform2f(programInfo.uniformLocations.resolution, gl.canvas.width, gl.canvas.height);
 
+        // Grid parameters - calculate based on CELL_SIZE
+        const cellSize = CELL_SIZE + 1; // CELL_SIZE + 1 for grid line
+        gl.uniform1f(programInfo.uniformLocations.gridSize, cellSize);
+        gl.uniform1f(programInfo.uniformLocations.gridWidth, 1.0); // 1 pixel wide grid lines
+        gl.uniform1i(programInfo.uniformLocations.showGrid, this.drawGridFlag ? 1 : 0);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }

@@ -32,5 +32,9 @@ export type ProgramInfo = {
     };
     uniformLocations: {
         texture: WebGLUniformLocation | null;
+        resolution: WebGLUniformLocation | null;
+        gridSize: WebGLUniformLocation | null;
+        gridWidth: WebGLUniformLocation | null;
+        showGrid: WebGLUniformLocation | null;
     };
 };
