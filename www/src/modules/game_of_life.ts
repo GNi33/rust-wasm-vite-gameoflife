@@ -11,7 +11,21 @@ export const GRID_COLOR = '#CCCCCC';
 export const DEAD_COLOR = '#FFFFFF';
 export const ALIVE_COLOR = '#000000';
 
-const wasm = await init();
+let wasmInitialized = false;
+let wasmInitPromise: Promise<any> | null = null;
+let wasmMemory: WebAssembly.Memory | null = null;
+
+async function initializeWasm() {
+    if (!wasmInitialized) {
+        if (!wasmInitPromise) {
+            wasmInitPromise = init();
+        }
+        const wasmModule = await wasmInitPromise;
+        wasmMemory = wasmModule.memory;
+        wasmInitialized = true;
+    }
+    return wasmMemory;
+}
 
 export const ORenderMode = {
     Render2D: '2D',
@@ -81,7 +95,11 @@ class GameOfLife implements GameOfLifeType {
         initialState: StartType | null,
         renderMode: RenderMode = ORenderMode.Render2D
     ): Promise<GameOfLife> {
-        const memory: WebAssembly.Memory = wasm.memory;
+        const memory = await initializeWasm();
+
+        if (!memory) {
+            throw new Error('Failed to initialize WASM memory');
+        }
 
         const universe = Universe.new(
             universeWidth,

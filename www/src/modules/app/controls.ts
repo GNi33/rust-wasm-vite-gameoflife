@@ -3,7 +3,7 @@ import { handleError, ensureGameOfLife } from './error';
 import { ORenderMode } from '../game_of_life';
 import { start_type_variants } from 'playground';
 
-export function setupControlHandlers(
+export async function setupControlHandlers(
     getGameOfLife: () => GameOfLifeType | null,
     controls: Controls,
     initializeGameOfLife: () => Promise<void>,

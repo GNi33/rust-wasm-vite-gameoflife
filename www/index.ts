@@ -49,24 +49,25 @@ const initializeGameOfLife = async () => {
     gameOfLife.draw();
 };
 
-setupControlHandlers(
-    () => gameOfLife,
-    {
-        playPauseButton,
-        renderTypeSelect,
-        startTypeSelect,
-        ticksPerFrameInput,
-        ticksPerFrameValue,
-        showGridCheckbox,
-        setUniverseSizeButton,
-    },
-    initializeGameOfLife,
-    getCanvas,
-    setCanvas,
-    attachCanvasHandlers
-);
-
 (async () => {
     gameOfLife = await initGameOfLife(canvas, 128, 128, 0, ORenderMode.Render2D);
     attachCanvasHandlers(canvas, () => gameOfLife);
+
+    // Setup controls after WASM is initialized
+    await setupControlHandlers(
+        () => gameOfLife,
+        {
+            playPauseButton,
+            renderTypeSelect,
+            startTypeSelect,
+            ticksPerFrameInput,
+            ticksPerFrameValue,
+            showGridCheckbox,
+            setUniverseSizeButton,
+        },
+        initializeGameOfLife,
+        getCanvas,
+        setCanvas,
+        attachCanvasHandlers
+    );
 })();
