@@ -1,4 +1,4 @@
-use playground::{StartType, Universe};
+use rust_wasm_vite_gameoflife::{StartType, Universe};
 use wasm_bindgen_test::wasm_bindgen_test;
 
 #[cfg(test)]
