@@ -1,7 +1,7 @@
 import type { Controls, GameOfLifeType } from '../types';
 import { handleError, ensureGameOfLife } from './error';
 import { ORenderMode } from '../game_of_life';
-import { start_type_variants } from 'playground';
+import { start_type_variants } from 'rust-wasm-vite-gameoflife';
 
 export async function setupControlHandlers(
     getGameOfLife: () => GameOfLifeType | null,

@@ -1,5 +1,5 @@
 import type { RenderContextInterface } from './render_context_interface.ts';
-import { Cell } from 'playground';
+import { Cell } from 'rust-wasm-vite-gameoflife';
 import { ALIVE_COLOR, CELL_SIZE, DEAD_COLOR, GRID_COLOR } from '../game_of_life.ts';
 
 export default class RenderContext2D implements RenderContextInterface {

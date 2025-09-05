@@ -1,4 +1,4 @@
-import init, { Cell, StartType, Universe } from 'playground';
+import init, { Cell, StartType, Universe } from 'rust-wasm-vite-gameoflife';
 import type { GameOfLifeType } from './types.ts';
 import type { RenderContextInterface } from './render_context/render_context_interface.ts';
 import { Fps } from './app/fps.ts';
