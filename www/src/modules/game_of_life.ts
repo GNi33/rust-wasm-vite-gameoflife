@@ -1,4 +1,4 @@
-import init, { Cell, StartType, Universe } from 'rust-wasm-vite-gameoflife';
+import init, { Cell, type InitOutput, StartType, Universe } from 'rust-wasm-vite-gameoflife';
 import type { GameOfLifeType } from './types.ts';
 import type { RenderContextInterface } from './render_context/render_context_interface.ts';
 import { Fps } from './app/fps.ts';
@@ -12,7 +12,7 @@ export const DEAD_COLOR = '#FFFFFF';
 export const ALIVE_COLOR = '#000000';
 
 let wasmInitialized = false;
-let wasmInitPromise: Promise<any> | null = null;
+let wasmInitPromise: Promise<InitOutput> | null = null;
 let wasmMemory: WebAssembly.Memory | null = null;
 
 async function initializeWasm() {
